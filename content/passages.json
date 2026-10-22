@@ -1,0 +1,188 @@
+[
+  {
+    "slug": "my-morning-routine",
+    "title_en": "My Morning Routine",
+    "title_ar": "روتيني الصباحي",
+    "description_en": "Simple present: what someone does every morning.",
+    "description_ar": "المضارع البسيط: ماذا يفعل شخص كل صباح.",
+    "level": "A1",
+    "theme": "amber",
+    "emoji": "☀️",
+    "sentences": [
+      { "en": "I wake up at six thirty every day.", "ar": "أستيقظ الساعة السادسة والنصف كل يوم." },
+      { "en": "First, I drink a glass of water.", "ar": "أولاً، أشرب كوباً من الماء." },
+      { "en": "Then I take a quick shower and get dressed.", "ar": "ثم آخذ حماماً سريعاً وألبس ملابسي." },
+      { "en": "I eat eggs and bread for breakfast.", "ar": "آكل بيضاً وخبزاً على الفطور." },
+      { "en": "I leave the house at seven fifteen and walk to the station.", "ar": "أخرج من البيت الساعة السابعة والربع وأمشي إلى المحطة." }
+    ],
+    "questions": [
+      { "en": "What time does the speaker wake up?", "ar": "متى يستيقظ المتحدث؟", "options": ["6:00", "6:30", "7:15", "7:30"], "answer": 1 },
+      { "en": "What does the speaker do first?", "ar": "ماذا يفعل المتحدث أولاً؟", "options": ["Takes a shower", "Eats eggs", "Drinks water", "Walks to the station"], "answer": 2 },
+      { "en": "How does the speaker get to the station?", "ar": "كيف يذهب المتحدث إلى المحطة؟", "options": ["By bus", "On foot", "By car", "By bike"], "answer": 1 }
+    ],
+    "glossary": { "take": "آخذ", "get": "(get dressed: ألبس)", "leave": "أخرج من / أغادر", "thirty": "ثلاثون (النصف)", "fifteen": "خمسة عشر (الربع)" }
+  },
+  {
+    "slug": "at-the-market",
+    "title_en": "At the Market",
+    "title_ar": "في السوق",
+    "description_en": "A weekly trip to the market with Dad.",
+    "description_ar": "مشوار أسبوعي إلى السوق مع الأب.",
+    "level": "A1",
+    "theme": "emerald",
+    "emoji": "🍎",
+    "sentences": [
+      { "en": "On Fridays, I go to the market with my father.", "ar": "أيام الجمعة، أذهب إلى السوق مع أبي." },
+      { "en": "We buy tomatoes, onions, and fresh bread.", "ar": "نشتري طماطم وبصلاً وخبزاً طازجاً." },
+      { "en": "The fruit seller knows my name.", "ar": "بائع الفاكهة يعرف اسمي." },
+      { "en": "He always gives me one free orange.", "ar": "دائماً يعطيني برتقالة واحدة مجاناً." },
+      { "en": "I carry the small bags, and my father carries the big ones.", "ar": "أحمل الأكياس الصغيرة، وأبي يحمل الكبيرة." }
+    ],
+    "questions": [
+      { "en": "When do they go to the market?", "ar": "متى يذهبون إلى السوق؟", "options": ["On Mondays", "On Fridays", "Every day", "On Sundays"], "answer": 1 },
+      { "en": "What does the fruit seller give the speaker?", "ar": "ماذا يعطي بائع الفاكهة المتحدث؟", "options": ["A banana", "An apple", "An orange", "Bread"], "answer": 2 },
+      { "en": "Who carries the big bags?", "ar": "من يحمل الأكياس الكبيرة؟", "options": ["The speaker", "The fruit seller", "The father", "The mother"], "answer": 2 }
+    ],
+    "glossary": { "ones": "(الـ) واحدة / الكبيرة", "me": "ـني (لي)", "free": "مجاني" }
+  },
+  {
+    "slug": "a-new-neighbor",
+    "title_en": "A New Neighbor",
+    "title_ar": "جار جديد",
+    "description_en": "The new family is nice. Their parrot is a different story.",
+    "description_ar": "العائلة الجديدة لطيفة، أما ببغاؤهم فقصة أخرى.",
+    "level": "A2",
+    "theme": "teal",
+    "emoji": "🦜",
+    "sentences": [
+      { "en": "A new family moved into the apartment next to ours last week.", "ar": "انتقلت عائلة جديدة إلى الشقة المجاورة لشقتنا الأسبوع الماضي." },
+      { "en": "They have two young children and a very loud parrot.", "ar": "عندهم طفلان صغيران وببغاء صوته عالٍ جداً." },
+      { "en": "The parrot says \"hello\" every time someone walks past the door.", "ar": "يقول الببغاء \"مرحباً\" كل مرة يمرّ فيها أحد من أمام الباب." },
+      { "en": "At first, it was funny, but now it wakes me up at five in the morning.", "ar": "في البداية كان الأمر مضحكاً، لكنه الآن يوقظني الساعة الخامسة صباحاً." },
+      { "en": "Yesterday, I finally knocked on their door to talk about it.", "ar": "أمس، طرقت بابهم أخيراً لأتكلم معهم في الموضوع." },
+      { "en": "They apologized and moved the bird to the other side of the apartment.", "ar": "اعتذروا ونقلوا الطائر إلى الجهة الأخرى من الشقة." }
+    ],
+    "questions": [
+      { "en": "When did the family move in?", "ar": "متى انتقلت العائلة؟", "options": ["Yesterday", "Last week", "Last month", "Last year"], "answer": 1 },
+      { "en": "What is the problem with the parrot?", "ar": "ما مشكلة الببغاء؟", "options": ["It bites", "It is too quiet", "It wakes the speaker up early", "It escapes"], "answer": 2 },
+      { "en": "What did the family do?", "ar": "ماذا فعلت العائلة؟", "options": ["They sold the parrot", "They moved the parrot", "They moved out", "They ignored the speaker"], "answer": 1 }
+    ],
+    "glossary": { "ours": "خاصتنا", "past": "من أمام / بجانب", "it": "هو (الأمر / الببغاء)", "side": "جهة / جانب" }
+  },
+  {
+    "slug": "learning-to-swim",
+    "title_en": "Learning to Swim",
+    "title_ar": "تعلّم السباحة",
+    "description_en": "It is never too late to learn something new.",
+    "description_ar": "لم يفت الأوان أبداً لتتعلم شيئاً جديداً.",
+    "level": "A2",
+    "theme": "sky",
+    "emoji": "🏊",
+    "sentences": [
+      { "en": "I didn't learn to swim until I was twenty-five.", "ar": "لم أتعلم السباحة حتى صار عمري خمساً وعشرين سنة." },
+      { "en": "As a child, I was always afraid of deep water.", "ar": "عندما كنت طفلاً، كنت دائماً أخاف من الماء العميق." },
+      { "en": "Last year, I joined a class for adults at the local pool.", "ar": "السنة الماضية، انضممت إلى صف للكبار في المسبح القريب." },
+      { "en": "Most of the other students were also nervous beginners.", "ar": "معظم الطلاب الآخرين كانوا أيضاً مبتدئين متوترين." },
+      { "en": "After ten lessons, I could swim across the pool without stopping.", "ar": "بعد عشرة دروس، صرت أستطيع أن أسبح عرض المسبح دون توقف." }
+    ],
+    "questions": [
+      { "en": "How old was the speaker when they learned to swim?", "ar": "كم كان عمر المتحدث عندما تعلّم السباحة؟", "options": ["Ten", "Fifteen", "Twenty-five", "Thirty"], "answer": 2 },
+      { "en": "Where did the speaker take lessons?", "ar": "أين أخذ المتحدث الدروس؟", "options": ["At the beach", "At a local pool", "At school", "In a lake"], "answer": 1 },
+      { "en": "How many lessons did it take?", "ar": "كم درساً احتاج؟", "options": ["Five", "Ten", "Fifteen", "Twenty"], "answer": 1 }
+    ],
+    "glossary": { "as": "عندما (as a child: في طفولتي)", "twenty-five": "خمسة وعشرون", "across": "عبر / من طرف لطرف" }
+  },
+  {
+    "slug": "the-library-card",
+    "title_en": "The Library Card",
+    "title_ar": "بطاقة المكتبة",
+    "description_en": "What you can do with a free library card.",
+    "description_ar": "ماذا تستطيع أن تفعل ببطاقة مكتبة مجانية.",
+    "level": "A2",
+    "theme": "indigo",
+    "emoji": "📚",
+    "sentences": [
+      { "en": "My town library offers free cards to everyone who lives here.", "ar": "مكتبة بلدتي تقدّم بطاقات مجانية لكل من يسكن هنا." },
+      { "en": "With a card, you can borrow up to six books at a time.", "ar": "بالبطاقة، تستطيع أن تستعير حتى ستة كتب في المرة الواحدة." },
+      { "en": "You can keep them for three weeks.", "ar": "تستطيع أن تحتفظ بها ثلاثة أسابيع." },
+      { "en": "If you return a book late, you pay a small fine.", "ar": "إذا أرجعت كتاباً متأخراً، تدفع غرامة صغيرة." },
+      { "en": "The library also has quiet rooms where students can study for free.", "ar": "في المكتبة أيضاً غرف هادئة يستطيع الطلاب أن يذاكروا فيها مجاناً." }
+    ],
+    "questions": [
+      { "en": "How much does a library card cost?", "ar": "كم تكلفة بطاقة المكتبة؟", "options": ["It is free", "Six dollars", "Three dollars", "It depends"], "answer": 0 },
+      { "en": "How many books can you borrow at once?", "ar": "كم كتاباً تستطيع أن تستعير في المرة الواحدة؟", "options": ["Three", "Four", "Six", "Ten"], "answer": 2 },
+      { "en": "What happens if you return a book late?", "ar": "ماذا يحدث إذا أرجعت كتاباً متأخراً؟", "options": ["You lose your card", "You pay a small fine", "Nothing happens", "You cannot borrow again"], "answer": 1 }
+    ],
+    "glossary": { "up": "(up to: حتى)", "them": "ها (الكتب)", "time": "مرة (at a time: في المرة الواحدة)", "fine": "غرامة" }
+  },
+  {
+    "slug": "working-from-home",
+    "title_en": "Working From Home",
+    "title_ar": "العمل من البيت",
+    "description_en": "More free time, and one surprising problem.",
+    "description_ar": "وقت فراغ أكثر، ومشكلة واحدة غير متوقعة.",
+    "level": "B1",
+    "theme": "violet",
+    "emoji": "💻",
+    "sentences": [
+      { "en": "Since the company changed its rules, I work from home three days a week.", "ar": "منذ أن غيّرت الشركة قوانينها، أعمل من البيت ثلاثة أيام في الأسبوع." },
+      { "en": "I save almost two hours that I used to spend in traffic.", "ar": "أوفّر تقريباً ساعتين كنت أقضيهما في الزحام." },
+      { "en": "However, it can be hard to stop working when the office is in your living room.", "ar": "لكن قد يكون من الصعب أن تتوقف عن العمل عندما يكون المكتب في غرفة الجلوس." },
+      { "en": "To fix this, I close my laptop at six o'clock and go for a walk.", "ar": "لأحل هذه المشكلة، أغلق حاسوبي الساعة السادسة وأخرج للمشي." },
+      { "en": "That short walk is how my brain knows the workday is over.", "ar": "ذلك المشي القصير هو الطريقة التي يعرف بها عقلي أن يوم العمل انتهى." }
+    ],
+    "questions": [
+      { "en": "How many days a week does the speaker work from home?", "ar": "كم يوماً في الأسبوع يعمل المتحدث من البيت؟", "options": ["Two", "Three", "Four", "Five"], "answer": 1 },
+      { "en": "What is the main difficulty of working from home?", "ar": "ما الصعوبة الرئيسية في العمل من البيت؟", "options": ["Slow internet", "Stopping work at the end of the day", "Noisy neighbors", "Not enough space"], "answer": 1 },
+      { "en": "Why does the speaker go for a walk at six?", "ar": "لماذا يتمشّى المتحدث الساعة السادسة؟", "options": ["To buy dinner", "To train for a race", "To mark the end of the workday", "To meet a friend"], "answer": 2 }
+    ],
+    "glossary": { "since": "منذ", "its": "ـها (الخاصة بها)", "used": "(used to: كنت ...)", "living": "(living room: غرفة الجلوس)", "this": "هذا (هذه المشكلة)", "over": "انتهى", "go": "أذهب (go for a walk: أتمشّى)" }
+  },
+  {
+    "slug": "a-weekend-without-a-phone",
+    "title_en": "A Weekend Without a Phone",
+    "title_ar": "عطلة بلا هاتف",
+    "description_en": "Two days in the mountains and a habit that changed.",
+    "description_ar": "يومان في الجبال وعادة تغيّرت.",
+    "level": "B1",
+    "theme": "emerald",
+    "emoji": "🏔️",
+    "sentences": [
+      { "en": "Last month, I spent a weekend in the mountains without my phone.", "ar": "الشهر الماضي، قضيت عطلة نهاية الأسبوع في الجبال بدون هاتفي." },
+      { "en": "For the first few hours, I kept reaching for my pocket out of habit.", "ar": "في الساعات الأولى، ظللت أمد يدي إلى جيبي من باب العادة." },
+      { "en": "By the evening, I had stopped thinking about messages and news.", "ar": "بحلول المساء، كنت قد توقفت عن التفكير في الرسائل والأخبار." },
+      { "en": "I noticed sounds I usually ignore, like the wind in the trees and the birds at sunrise.", "ar": "لاحظت أصواتاً أتجاهلها عادة، مثل الريح في الأشجار والطيور عند الشروق." },
+      { "en": "When I came back, I had dozens of notifications, but none of them were urgent.", "ar": "عندما عدت، كانت عندي عشرات الإشعارات، لكن لم يكن أي منها عاجلاً." },
+      { "en": "Now I leave my phone in another room for one hour every evening.", "ar": "الآن أترك هاتفي في غرفة أخرى ساعة واحدة كل مساء." }
+    ],
+    "questions": [
+      { "en": "Where did the speaker spend the weekend?", "ar": "أين قضى المتحدث عطلة نهاية الأسبوع؟", "options": ["At the beach", "In the mountains", "In a big city", "At home"], "answer": 1 },
+      { "en": "What happened in the first few hours?", "ar": "ماذا حدث في الساعات الأولى؟", "options": ["The speaker felt calm", "The speaker kept reaching for the phone", "The speaker got lost", "The speaker fell asleep"], "answer": 1 },
+      { "en": "What new habit does the speaker have?", "ar": "ما العادة الجديدة عند المتحدث؟", "options": ["Hiking every weekend", "Turning off notifications forever", "Leaving the phone in another room each evening", "Waking up at sunrise"], "answer": 2 }
+    ],
+    "glossary": { "kept": "ظلّ / استمر", "out": "(out of habit: بحكم العادة)", "like": "مثل", "none": "لا أحد / لا شيء", "them": "ها (الإشعارات)", "came": "جاء (came back: عاد)" }
+  },
+  {
+    "slug": "why-we-forget-words",
+    "title_en": "Why We Forget Words",
+    "title_ar": "لماذا ننسى الكلمات",
+    "description_en": "A little science behind how this app works.",
+    "description_ar": "قليل من العلم وراء طريقة عمل هذا الموقع.",
+    "level": "B1",
+    "theme": "rose",
+    "emoji": "🧠",
+    "sentences": [
+      { "en": "Most people forget a new word within a few days if they never use it again.", "ar": "معظم الناس ينسون الكلمة الجديدة خلال أيام قليلة إذا لم يستخدموها مرة أخرى." },
+      { "en": "Scientists call this the forgetting curve.", "ar": "يسمي العلماء هذا «منحنى النسيان»." },
+      { "en": "The good news is that each review makes the memory stronger and slower to fade.", "ar": "الخبر الجيد أن كل مراجعة تجعل الذاكرة أقوى وأبطأ في التلاشي." },
+      { "en": "Reviewing a word after one day, then after a week, then after a month works much better than studying it ten times in one night.", "ar": "مراجعة الكلمة بعد يوم، ثم بعد أسبوع، ثم بعد شهر تنجح أكثر بكثير من مذاكرتها عشر مرات في ليلة واحدة." },
+      { "en": "Writing the word yourself, instead of only reading it, also helps it stick.", "ar": "كتابة الكلمة بنفسك، بدلاً من قراءتها فقط، تساعد أيضاً على تثبيتها." }
+    ],
+    "questions": [
+      { "en": "What is the forgetting curve about?", "ar": "عن ماذا يتحدث «منحنى النسيان»؟", "options": ["How fast we forget new information", "How to read faster", "Why we need sleep", "How children learn to speak"], "answer": 0 },
+      { "en": "Which study plan works best?", "ar": "أي خطة مذاكرة تنجح أكثر؟", "options": ["Studying a word ten times in one night", "Reviewing after a day, a week, then a month", "Never reviewing", "Only reading the word"], "answer": 1 },
+      { "en": "What else helps a word stick?", "ar": "ماذا يساعد أيضاً على تثبيت الكلمة؟", "options": ["Writing it yourself", "Saying it quickly", "Reading it silently", "Ignoring it"], "answer": 0 }
+    ],
+    "glossary": { "it": "ها (الكلمة)", "this": "هذا", "news": "الخبر", "much": "بكثير", "stick": "تثبت (في الذاكرة)", "instead": "بدلاً من (instead of)" }
+  }
+]

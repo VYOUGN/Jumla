@@ -1,0 +1,137 @@
+[
+  {
+    "slug": "first-day-at-the-bakery",
+    "title_en": "First Day at the Bakery",
+    "title_ar": "أول يوم في المخبز",
+    "description_en": "Sara starts a new job before the sun comes up.",
+    "description_ar": "سارة تبدأ عملاً جديداً قبل شروق الشمس.",
+    "level": "A1",
+    "theme": "amber",
+    "emoji": "🥐",
+    "sentences": [
+      { "en": "Sara wakes up early on Monday.", "ar": "تستيقظ سارة مبكراً يوم الاثنين." },
+      { "en": "Today is her first day at the bakery.", "ar": "اليوم هو أول يوم لها في المخبز." },
+      { "en": "The air outside is cold and quiet.", "ar": "الجو في الخارج بارد وهادئ." },
+      { "en": "Her boss smiles and gives her a white apron.", "ar": "مديرها يبتسم ويعطيها مريلة بيضاء." },
+      { "en": "She learns how to make bread with her hands.", "ar": "تتعلم كيف تصنع الخبز بيديها." },
+      { "en": "At eight o'clock, the first customers arrive.", "ar": "في الساعة الثامنة، يصل أول الزبائن." },
+      { "en": "An old man asks for two warm rolls.", "ar": "رجل كبير في السن يطلب رغيفين دافئين." },
+      { "en": "Sara puts them in a bag and says thank you.", "ar": "تضعهما سارة في كيس وتقول شكراً." },
+      { "en": "By the afternoon, her feet are tired.", "ar": "بحلول العصر، تكون قدماها متعبتين." },
+      { "en": "But she is happy, and she wants to come back tomorrow.", "ar": "لكنها سعيدة، وتريد أن تعود غداً." }
+    ],
+    "glossary": { "sara": "سارة", "her": "ها / لها", "rolls": "أرغفة صغيرة", "them": "هم / ها", "feet": "قدمان" }
+  },
+  {
+    "slug": "the-lost-key",
+    "title_en": "The Lost Key",
+    "title_ar": "المفتاح الضائع",
+    "description_en": "Omar comes home late and cannot get in.",
+    "description_ar": "عمر يعود متأخراً ولا يستطيع الدخول.",
+    "level": "A1",
+    "theme": "indigo",
+    "emoji": "🔑",
+    "sentences": [
+      { "en": "Omar comes home late after work.", "ar": "يعود عمر إلى البيت متأخراً بعد العمل." },
+      { "en": "He puts his hand in his pocket, but the key is not there.", "ar": "يضع يده في جيبه، لكن المفتاح ليس هناك." },
+      { "en": "He checks his bag and his car.", "ar": "يفحص حقيبته وسيارته." },
+      { "en": "Nothing. The key is gone.", "ar": "لا شيء. المفتاح ضاع." },
+      { "en": "He calls his sister, but she does not answer.", "ar": "يتصل بأخته، لكنها لا ترد." },
+      { "en": "Then he hears a small sound from the window above.", "ar": "ثم يسمع صوتاً خفيفاً من النافذة في الأعلى." },
+      { "en": "His neighbor is holding something shiny.", "ar": "جاره يمسك شيئاً لامعاً." },
+      { "en": "\"Is this yours? It was on the stairs.\"", "ar": "\"هل هذا لك؟ كان على الدرج.\"" },
+      { "en": "Omar laughs and thanks him three times.", "ar": "يضحك عمر ويشكره ثلاث مرات." }
+    ],
+    "glossary": { "omar": "عمر", "his": "ـه (له)", "him": "ـه (هو)", "gone": "ضائع / ذهب" }
+  },
+  {
+    "slug": "the-bus-to-the-sea",
+    "title_en": "The Bus to the Sea",
+    "title_ar": "الحافلة إلى البحر",
+    "description_en": "A long summer trip with a brother who cannot wait.",
+    "description_ar": "رحلة صيفية طويلة مع أخ لا يستطيع الانتظار.",
+    "level": "A2",
+    "theme": "sky",
+    "emoji": "🌊",
+    "sentences": [
+      { "en": "Every summer, my family takes the bus to the sea.", "ar": "كل صيف، تركب عائلتي الحافلة إلى البحر." },
+      { "en": "The trip is long, so we bring sandwiches and cold water.", "ar": "الرحلة طويلة، لذلك نأخذ معنا شطائر وماءً بارداً." },
+      { "en": "My little brother always sits next to the window.", "ar": "أخي الصغير يجلس دائماً بجانب النافذة." },
+      { "en": "He counts the trees and the cows on the way.", "ar": "يعدّ الأشجار والأبقار في الطريق." },
+      { "en": "After three hours, we can smell the salt in the air.", "ar": "بعد ثلاث ساعات، نستطيع أن نشم رائحة الملح في الهواء." },
+      { "en": "The moment the doors open, he runs to the beach.", "ar": "في اللحظة التي تُفتح فيها الأبواب، يركض إلى الشاطئ." },
+      { "en": "My mother shouts at him to wait, but he never listens.", "ar": "تصرخ أمي عليه لينتظر، لكنه لا يسمع الكلام أبداً." },
+      { "en": "We spend the whole day swimming and building castles in the sand.", "ar": "نقضي اليوم كله في السباحة وبناء القلاع في الرمل." },
+      { "en": "On the way home, everyone falls asleep except the driver.", "ar": "في طريق العودة، ينام الجميع ما عدا السائق." }
+    ],
+    "glossary": { "takes": "يركب / يأخذ", "way": "الطريق", "moment": "اللحظة", "falls": "يقع (falls asleep: يغفو)" }
+  },
+  {
+    "slug": "the-phone-that-would-not-stop",
+    "title_en": "The Phone That Would Not Stop",
+    "title_ar": "الهاتف الذي لم يتوقف",
+    "description_en": "A quiet exam room and a very loud mistake.",
+    "description_ar": "قاعة امتحان هادئة وخطأ عالي الصوت جداً.",
+    "level": "A2",
+    "theme": "violet",
+    "emoji": "📱",
+    "sentences": [
+      { "en": "Lina was in the middle of an important exam.", "ar": "كانت لينا في منتصف امتحان مهم." },
+      { "en": "The room was silent, and everyone was writing.", "ar": "كانت القاعة صامتة، والجميع يكتبون." },
+      { "en": "Suddenly, a loud song started playing from her bag.", "ar": "فجأة، بدأت أغنية عالية تعمل من حقيبتها." },
+      { "en": "Her face turned red as every head turned toward her.", "ar": "احمرّ وجهها عندما التفتت كل الرؤوس نحوها." },
+      { "en": "She had forgotten to turn off her alarm.", "ar": "كانت قد نسيت أن تطفئ المنبّه." },
+      { "en": "She searched for the phone with shaking hands.", "ar": "بحثت عن الهاتف بيدين مرتجفتين." },
+      { "en": "The teacher walked over slowly and raised one eyebrow.", "ar": "مشى المعلم نحوها ببطء ورفع حاجباً واحداً." },
+      { "en": "\"Nice song,\" he said, \"but please finish your exam first.\"", "ar": "قال: \"أغنية جميلة، لكن من فضلك أنهي امتحانك أولاً.\"" },
+      { "en": "The whole class laughed, and Lina finally relaxed.", "ar": "ضحك الفصل كله، وأخيراً ارتاحت لينا." }
+    ],
+    "glossary": { "lina": "لينا", "turned": "تحوّل / التفت", "as": "عندما", "over": "نحو / إلى هناك", "playing": "يعمل / يُشغَّل" }
+  },
+  {
+    "slug": "grandmothers-recipe",
+    "title_en": "Grandmother's Recipe",
+    "title_ar": "وصفة جدتي",
+    "description_en": "Some recipes are written down. Some live only in someone's hands.",
+    "description_ar": "بعض الوصفات تُكتب، وبعضها يعيش فقط في يدي صاحبها.",
+    "level": "B1",
+    "theme": "rose",
+    "emoji": "🍲",
+    "sentences": [
+      { "en": "My grandmother never wrote her recipes down.", "ar": "جدتي لم تكتب وصفاتها أبداً." },
+      { "en": "She cooked from memory, adding a little of this and a little of that.", "ar": "كانت تطبخ من ذاكرتها، تضيف قليلاً من هذا وقليلاً من ذاك." },
+      { "en": "When I asked her how much salt to use, she just shrugged.", "ar": "عندما سألتها كم من الملح أستخدم، هزّت كتفيها فقط." },
+      { "en": "\"Enough,\" she said, as if that explained everything.", "ar": "قالت: \"ما يكفي\"، كأن ذلك يشرح كل شيء." },
+      { "en": "Last winter, I decided to learn her famous lentil soup.", "ar": "في الشتاء الماضي، قررت أن أتعلم شوربة العدس المشهورة التي تصنعها." },
+      { "en": "I stood next to her in the kitchen and took notes on my phone.", "ar": "وقفت بجانبها في المطبخ وكتبت ملاحظات على هاتفي." },
+      { "en": "My first try tasted nothing like hers.", "ar": "محاولتي الأولى لم يكن طعمها يشبه طعم شوربتها أبداً." },
+      { "en": "She tasted it, smiled, and added a squeeze of lemon.", "ar": "تذوقتها، وابتسمت، وأضافت عصرة ليمون." },
+      { "en": "Suddenly, it tasted exactly like my childhood.", "ar": "فجأة، صار طعمها تماماً مثل طفولتي." },
+      { "en": "Now the recipe lives in my phone, but the secret is still in her hands.", "ar": "الآن الوصفة محفوظة في هاتفي، لكن السر ما زال في يديها." }
+    ],
+    "glossary": { "down": "(wrote down: دوّن)", "as": "كأن (as if)", "if": "لو (as if: كأن)", "her": "ها / لها", "hers": "خاصتها", "like": "مثل", "it": "ها (الشوربة)" }
+  },
+  {
+    "slug": "the-interview",
+    "title_en": "The Interview",
+    "title_ar": "المقابلة",
+    "description_en": "Khalid prepared every answer except the one that mattered.",
+    "description_ar": "خالد حضّر كل الإجابات، إلا الإجابة الأهم.",
+    "level": "B1",
+    "theme": "slate",
+    "emoji": "💼",
+    "sentences": [
+      { "en": "Khalid arrived at the office twenty minutes early.", "ar": "وصل خالد إلى المكتب قبل الموعد بعشرين دقيقة." },
+      { "en": "He had practiced his answers in front of the mirror all week.", "ar": "كان قد تدرّب على إجاباته أمام المرآة طوال الأسبوع." },
+      { "en": "While he was waiting, he noticed a woman struggling with a heavy box.", "ar": "بينما كان ينتظر، لاحظ امرأة تجد صعوبة في حمل صندوق ثقيل." },
+      { "en": "Without thinking, he stood up and helped her carry it to the elevator.", "ar": "دون تفكير، وقف وساعدها في حمله إلى المصعد." },
+      { "en": "She thanked him and disappeared behind the closing doors.", "ar": "شكرته واختفت خلف الأبواب التي تُغلق." },
+      { "en": "A few minutes later, his name was called.", "ar": "بعد دقائق قليلة، نُودي اسمه." },
+      { "en": "He walked into the meeting room and froze.", "ar": "دخل إلى غرفة الاجتماعات وتجمّد في مكانه." },
+      { "en": "The woman with the box was sitting at the head of the table.", "ar": "المرأة صاحبة الصندوق كانت تجلس على رأس الطاولة." },
+      { "en": "\"You already answered my most important question,\" she said with a smile.", "ar": "قالت بابتسامة: \"لقد أجبت عن أهم سؤال عندي.\"" },
+      { "en": "He got the job before he had even opened his folder.", "ar": "حصل على الوظيفة قبل أن يفتح ملفه حتى." }
+    ],
+    "glossary": { "khalid": "خالد", "his": "ـه (له)", "him": "ـه (هو)", "her": "ها", "it": "ـه (الصندوق)", "head": "رأس", "front": "أمام (in front of)" }
+  }
+]

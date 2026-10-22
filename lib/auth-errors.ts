@@ -1,0 +1,18 @@
+/** Supabase auth messages in Arabic. */
+export function authErrorAr(message: string | undefined): string {
+  const m = (message ?? "").toLowerCase();
+  if (m.includes("invalid login credentials")) return "الإيميل أو كلمة المرور غير صحيحة.";
+  if (m.includes("email not confirmed")) return "أكّد إيميلك أولاً من الرسالة التي وصلتك.";
+  if (m.includes("already registered") || m.includes("already been registered")) return "هذا الإيميل مسجّل مسبقاً. سجّل الدخول بدلاً من ذلك.";
+  if (m.includes("password") && (m.includes("at least") || m.includes("weak") || m.includes("short")))
+    return "كلمة المرور ضعيفة. استخدم 8 أحرف على الأقل.";
+  if (m.includes("database error saving new user") || m.includes("invalid_invite_code")) return "كود الدعوة غير صحيح.";
+  if (m.includes("rate limit") || m.includes("too many")) return "محاولات كثيرة. انتظر قليلاً ثم جرّب مرة أخرى.";
+  if (m.includes("failed to fetch") || m.includes("network")) return "لا يوجد اتصال بالإنترنت. تأكد من الاتصال وجرّب مرة أخرى.";
+  return "حدث خطأ غير متوقع. جرّب مرة أخرى.";
+}
+
+/** Only allow redirects to paths on this site. */
+export function safeNext(next: string | null | undefined, fallback = "/learn"): string {
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
+}

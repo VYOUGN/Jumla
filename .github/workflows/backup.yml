@@ -1,0 +1,95 @@
+# Daily copy of the whole database, kept for 90 days under Actions → this workflow → Artifacts.
+# Needs the repository secret SUPABASE_DB_URL (Supabase → Connect → Session pooler URI).
+# Optional secrets NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY also ping the API
+# so a quiet week never lets the free Supabase project pause.
+name: Daily database backup
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-17
+
+      - name: Dump database
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::Add the SUPABASE_DB_URL repository secret (see README)."
+            exit 1
+          fi
+          # Split the link by hand (like scripts/db-url.ts) so a password with @ # / ? still works,
+          # and try a percent-encoded password (%40 for @) decoded first, then exactly as written.
+          eval "$(python3 - <<'PY'
+          import os, re, shlex
+          from urllib.parse import unquote
+          rest = os.environ["SUPABASE_DB_URL"].strip().split("://", 1)[1]
+          creds, hostpart = rest.rsplit("@", 1)
+          user, _, password = creds.partition(":")
+          hostport, _, tail = hostpart.partition("/")
+          host, _, port = hostport.partition(":")
+          decoded = unquote(password) if re.search(r"%[0-9A-Fa-f]{2}", password) else password
+          parts = {"PGUSER": user, "PGHOST": host, "PGPORT": port or "5432",
+                   "PGDATABASE": tail.split("?", 1)[0] or "postgres",
+                   "PW_DECODED": decoded, "PW_RAW": password}
+          for key, value in parts.items():
+              print(f"export {key}={shlex.quote(value)}")
+          PY
+          )"
+          echo "::add-mask::$PW_DECODED"
+          echo "::add-mask::$PW_RAW"
+          export PGSSLMODE=require
+          PG=/usr/lib/postgresql/17/bin
+          for candidate in "$PW_DECODED" "$PW_RAW"; do
+            if PGPASSWORD="$candidate" $PG/psql -tAc "select 1" > /dev/null 2>&1; then
+              export PGPASSWORD="$candidate"
+              break
+            fi
+          done
+          if [ -z "${PGPASSWORD:-}" ]; then
+            echo "::error::Could not log in to the database. Check the password in the SUPABASE_DB_URL secret."
+            exit 1
+          fi
+
+          stamp=$(date -u +%Y-%m-%d)
+          mkdir -p backup
+          # Content, progress and settings.
+          $PG/pg_dump --schema=public --no-owner --no-privileges -Fc -f "backup/public-$stamp.dump"
+          # Accounts, so friends keep the same logins (and progress stays linked) after a restore.
+          $PG/pg_dump --data-only --table=auth.users --table=auth.identities \
+            --no-owner --no-privileges -Fc -f "backup/auth-$stamp.dump"
+          ls -la backup
+
+      - name: Upload backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: jumla-backup-${{ github.run_number }}
+          path: backup/
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Keep the Supabase project awake
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_KEY" ]; then
+            curl -fsS "$SUPABASE_URL/rest/v1/units?select=id&limit=1" \
+              -H "apikey: $SUPABASE_KEY" -H "Authorization: Bearer $SUPABASE_KEY" > /dev/null && echo "pinged"
+          else
+            echo "Skipped (optional secrets not set)."
+          fi
