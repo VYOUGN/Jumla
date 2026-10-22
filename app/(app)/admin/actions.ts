@@ -17,6 +17,9 @@ function fail(error: unknown): ActionResult {
   const msg = typeof error === "object" && error && "message" in error ? String(error.message) : String(error);
   if (msg.includes("units_slug_key") || msg.includes("duplicate key")) return { ok: false, error: "هذا الرابط (slug) مستخدم في درس آخر." };
   if (msg.includes("last admin")) return { ok: false, error: "لا يمكن إزالة آخر مدير." };
+  if (msg.includes("cannot delete yourself")) return { ok: false, error: "ما تقدر تحذف حسابك أنت من هنا." };
+  if (msg.includes("cannot delete an admin")) return { ok: false, error: "هذا مدير. اجعله عضواً أولاً، ثم احذفه." };
+  if (msg.includes("member not found")) return { ok: false, error: "العضو غير موجود، ربما حُذف مسبقاً." };
   return { ok: false, error: msg || "حدث خطأ." };
 }
 
@@ -185,6 +188,16 @@ export async function setReportStatus(id: string, resolved: boolean): Promise<Ac
 export async function setRole(userId: string, role: "admin" | "member"): Promise<ActionResult> {
   const { supabase } = await requireAdmin();
   const { error } = await supabase.from("profiles").update({ role }).eq("id", userId);
+  if (error) return fail(error);
+  done();
+  return { ok: true };
+}
+
+/** Deletes a member's account (not their progress rows); see migration 0007. */
+export async function deleteMember(userId: string): Promise<ActionResult> {
+  const { supabase } = await requireAdmin();
+  if (!UUID.test(userId)) return { ok: false, error: "معرّف غير صالح." };
+  const { error } = await supabase.rpc("admin_delete_user", { p_user: userId });
   if (error) return fail(error);
   done();
   return { ok: true };

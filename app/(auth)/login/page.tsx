@@ -14,7 +14,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <p className="mb-6 text-muted">سجّل الدخول لتكمل من حيث توقفت.</p>
       <HashNotice />
       {error === "link" && (
-        <p className="mb-4 rounded-lg bg-danger/10 p-3 text-sm text-danger">الرابط غير صالح أو انتهت صلاحيته.</p>
+        <p className="mb-4 rounded-lg bg-danger/10 p-3 text-sm leading-7 text-danger">
+          ما قدرنا نكمل الرابط، ربما انتهت صلاحيته أو فتحته في متصفح ثاني. إذا كان رابط تأكيد الإيميل، جرّب تسجّل الدخول
+          الآن، فغالباً تم التأكيد. وإذا ما زبط، اطلب رابطاً جديداً.
+        </p>
       )}
       <LoginForm next={safeNext(next)} />
       <div className="mt-6 flex justify-between text-sm text-muted">

@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PasswordField } from "@/components/PasswordField";
+import { ResendConfirmation } from "@/components/ResendConfirmation";
 import { authErrorAr } from "@/lib/auth-errors";
 import { MIN_PASSWORD_LENGTH, newPasswordProblem, PASSWORD_MESSAGES } from "@/lib/passwords";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -13,7 +15,7 @@ export function RegisterForm() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [checkEmail, setCheckEmail] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
   const confirmState = confirm === "" ? null : confirm === password ? "match" : "mismatch";
 
@@ -37,8 +39,9 @@ export function RegisterForm() {
       return;
     }
 
+    const email = String(form.get("email")).trim();
     const { data, error } = await supabase.auth.signUp({
-      email: String(form.get("email")).trim(),
+      email,
       password,
       options: {
         data: { display_name: String(form.get("name")).trim(), invite_code: code },
@@ -54,16 +57,29 @@ export function RegisterForm() {
       router.replace("/learn");
       router.refresh();
     } else {
-      setCheckEmail(true);
+      // Email confirmation is on: the account only works after the link in the email is opened.
+      setSentTo(email);
       setBusy(false);
     }
   }
 
-  if (checkEmail) {
+  if (sentTo) {
     return (
-      <p className="leading-8">
-        أرسلنا لك رسالة تأكيد على إيميلك. افتحها واضغط الرابط، وبعدها تقدر تبدأ.
-      </p>
+      <div className="space-y-4 leading-8">
+        <p className="text-4xl" aria-hidden>
+          📧
+        </p>
+        <h2 className="text-xl font-bold">باقي خطوة: أكّد إيميلك</h2>
+        <p>
+          أرسلنا رابط تأكيد إلى <span className="en font-semibold">{sentTo}</span>. افتح الرسالة واضغط الرابط، وبعدها
+          تدخل الموقع مباشرة.
+        </p>
+        <p className="text-sm text-muted">ما وصلت؟ انتظر دقيقة، وافحص مجلد البريد غير المرغوب فيه (Spam).</p>
+        <ResendConfirmation email={sentTo} />
+        <Link href="/login" className="inline-block text-sm text-accent">
+          أكّدت إيميلك؟ سجّل الدخول
+        </Link>
+      </div>
     );
   }
 

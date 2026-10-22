@@ -25,7 +25,14 @@ const GROUPS: { title: string; items: { key: ToggleKey; label: string; help: str
   },
   {
     title: "الصوت",
-    items: [{ key: "autoPlay", label: "تشغيل الصوت تلقائياً", help: "تسمع كل جملة أول ما تظهر." }],
+    items: [
+      { key: "autoPlay", label: "تشغيل الصوت تلقائياً", help: "تسمع كل جملة أول ما تظهر." },
+      {
+        key: "typingSounds",
+        label: "مؤثرات صوتية للكتابة",
+        help: "صوت خفيف مع كل حرف صحيح، وصوت مختلف للحرف الغلط، ونغمة عند إكمال الجملة.",
+      },
+    ],
   },
 ];
 

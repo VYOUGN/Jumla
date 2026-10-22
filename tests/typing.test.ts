@@ -29,6 +29,9 @@ describe("typing engine", () => {
     expect(r.result).toBe("wrong");
     expect(r.state.pos).toBe(1);
     expect(r.state.errors).toBe(1);
+    expect(r.state.missed).toEqual([1]);
+    // a second wrong key on the same letter doesn't list the position twice
+    expect(typeChar(r.state, "y", opts, 11).state.missed).toEqual([1]);
     const done = typeAll(r.state, "at", opts, 20).state;
     expect(done.finishedAt).not.toBeNull();
     expect(accuracy(done)).toBeCloseTo(3 / 4);

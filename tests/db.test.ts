@@ -278,6 +278,36 @@ describe("row level security", () => {
     expect(p.rows[0].tours_seen).toEqual(["home"]);
   });
 
+  it("lets an admin delete a member's account but keeps their progress rows", async () => {
+    const leaver = await signUp("leaver@example.com", "let-me-in");
+    await record(leaver, [ev({ item_id: sentenceIds[0], unit_id: unitId, position: 0 })]);
+
+    await expect(as(member, () => db.query("select public.admin_delete_user($1)", [leaver]))).rejects.toThrow(
+      /only an admin/,
+    );
+    await as(admin, () => db.query("select public.admin_delete_user($1)", [leaver]));
+
+    const users = await db.query("select 1 from auth.users where id = $1", [leaver]);
+    const profiles = await db.query("select 1 from public.profiles where id = $1", [leaver]);
+    const events = await db.query("select 1 from public.progress_events where user_id = $1", [leaver]);
+    expect(users.rows).toHaveLength(0);
+    expect(profiles.rows).toHaveLength(0);
+    expect(events.rows).toHaveLength(1);
+  });
+
+  it("won't delete yourself or another admin", async () => {
+    await expect(as(admin, () => db.query("select public.admin_delete_user(auth.uid())"))).rejects.toThrow(
+      /cannot delete yourself/,
+    );
+    const second = await signUp("second-admin@example.com", "let-me-in");
+    await db.query("update public.profiles set role = 'admin' where id = $1", [second]);
+    await expect(as(admin, () => db.query("select public.admin_delete_user($1)", [second]))).rejects.toThrow(
+      /cannot delete an admin/,
+    );
+    // Leave the original single admin, which the next tests rely on.
+    await db.query("update public.profiles set role = 'member' where id = $1", [second]);
+  });
+
   it("keeps at least one admin", async () => {
     await as(admin, async () => {
       await expect(db.query("update public.profiles set role = 'member' where id = auth.uid()")).rejects.toThrow(/last admin/);

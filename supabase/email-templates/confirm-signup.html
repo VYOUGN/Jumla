@@ -1,0 +1,17 @@
+<!--
+  Supabase → Authentication → Emails → Templates → "Confirm signup"
+  Subject: أكّد إيميلك في جُملة
+  Paste everything below this comment into "Message body".
+  The link uses a token hash, so it works even if the email is opened on another device.
+-->
+<div dir="rtl" style="font-family: Tahoma, Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #1f2933;">
+  <h2 style="margin: 0 0 12px;">أهلاً بك في جُملة 👋</h2>
+  <p style="line-height: 1.9; margin: 0;">باقي خطوة وحدة: اضغط الزر تحت لتأكيد إيميلك وتفعيل حسابك.</p>
+  <p style="margin: 28px 0;">
+    <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email&next=/learn"
+       style="background: #14b8a6; color: #042f2e; padding: 12px 22px; border-radius: 10px; text-decoration: none; font-weight: bold;">
+      تأكيد الإيميل
+    </a>
+  </p>
+  <p style="line-height: 1.8; color: #6b7280; font-size: 13px; margin: 0;">إذا ما سجّلت في جُملة، تجاهل هذه الرسالة.</p>
+</div>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageTitle } from "@/components/AppShell";
 import { requireAdmin } from "@/lib/auth";
+import { DeleteMemberButton } from "./DeleteMemberButton";
 import { RoleButton } from "./RoleButton";
 
 export const metadata: Metadata = { title: "المستخدمون" };
@@ -28,7 +29,7 @@ export default async function UsersPage() {
     <>
       <PageTitle
         title="المستخدمون"
-        subtitle="تقدّم أصحابك للعرض فقط. لا يوجد زر حذف للتقدّم، ولا حتى للمدير."
+        subtitle="تقدّم أصحابك للعرض فقط. تقدر تحذف حساب عضو، لكن سجل تقدّمه يبقى محفوظاً في قاعدة البيانات."
       />
       {error && <p className="mb-4 text-danger">{error.message}</p>}
       <div className="card overflow-x-auto">
@@ -41,6 +42,7 @@ export default async function UsersPage() {
               <th className="p-3 text-start font-medium">الجمل</th>
               <th className="p-3 text-start font-medium">آخر نشاط</th>
               <th className="p-3 text-start font-medium">الدور</th>
+              <th className="p-3 text-start font-medium">الحساب</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -53,6 +55,17 @@ export default async function UsersPage() {
                 <td className="en p-3 text-muted">{r.last_active_date ?? "—"}</td>
                 <td className="p-3">
                   <RoleButton id={r.id} role={r.role} self={r.id === user.id} />
+                </td>
+                <td className="p-3">
+                  {r.id === user.id ? (
+                    <span className="text-xs text-muted">أنت</span>
+                  ) : r.role === "admin" ? (
+                    <span className="text-xs text-muted" title="اجعله عضواً أولاً لتقدر تحذفه">
+                      —
+                    </span>
+                  ) : (
+                    <DeleteMemberButton id={r.id} name={r.display_name} email={r.email} />
+                  )}
                 </td>
               </tr>
             ))}

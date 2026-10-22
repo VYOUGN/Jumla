@@ -11,6 +11,9 @@ export function authErrorAr(message: string | undefined): string {
     return "كلمة المرور ضعيفة. استخدم 8 أحرف على الأقل.";
   if (m.includes("database error saving new user") || m.includes("invalid_invite_code")) return "كود الدعوة غير صحيح.";
   if (m.includes("rate limit") || m.includes("too many")) return "محاولات كثيرة. انتظر قليلاً ثم جرّب مرة أخرى.";
+  if (m.includes("security purposes")) return "انتظر دقيقة قبل ما تطلب رسالة جديدة.";
+  if (m.includes("error sending") || m.includes("sending confirmation email") || m.includes("smtp"))
+    return "ما قدرنا نرسل الإيميل الآن. جرّب بعد شوي، وإذا تكررت المشكلة أخبر صاحب الموقع.";
   if (m.includes("failed to fetch") || m.includes("network")) return "لا يوجد اتصال بالإنترنت. تأكد من الاتصال وجرّب مرة أخرى.";
   return "حدث خطأ غير متوقع. جرّب مرة أخرى.";
 }

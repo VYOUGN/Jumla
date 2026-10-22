@@ -13,6 +13,7 @@ export type Prefs = {
   showTranslation: boolean;
   showHints: boolean;
   dictation: boolean;
+  typingSounds: boolean;
 };
 
 export const DEFAULT_PREFS: Prefs = {
@@ -23,6 +24,7 @@ export const DEFAULT_PREFS: Prefs = {
   showTranslation: true,
   showHints: true,
   dictation: false,
+  typingSounds: true,
 };
 
 const KEY = "jumla.prefs.v1";

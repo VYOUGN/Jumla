@@ -257,7 +257,7 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
         setPrefs={setPrefs}
         options={
           mode === "passage"
-            ? ["showTranslation", "showHints", "ignoreCase", "skipPunctuation", "autoPlay", "rate"]
+            ? ["showTranslation", "showHints", "ignoreCase", "skipPunctuation", "autoPlay", "typingSounds", "rate"]
             : undefined
         }
         settingsOpen={settingsOpen}

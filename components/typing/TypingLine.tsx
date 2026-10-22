@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Prefs } from "@/lib/prefs";
+import { sfx } from "@/lib/sfx";
 import {
   accuracy,
   createTyping,
@@ -53,6 +54,9 @@ export function TypingLine({
   const [lastKeyAt, setLastKeyAt] = useState(0);
   const [shakeKey, setShakeKey] = useState(0);
   const [arabicHint, setArabicHint] = useState(false);
+  // The last wrong key, shown in red at the letter where it happened.
+  const [flash, setFlash] = useState<{ id: number; pos: number; char: string } | null>(null);
+  const flashTimer = useRef<number | undefined>(undefined);
   const stateRef = useRef(state);
   const doneRef = useRef(false);
   const buffer = useRef("");
@@ -91,7 +95,8 @@ export function TypingLine({
   function handle(text: string) {
     if (pausedRef.current) return;
     let s = stateRef.current;
-    let wrong = false;
+    let wrong: { pos: number; char: string } | null = null;
+    let correct = false;
     let arabic = false;
     const now = Date.now();
     for (const ch of text) {
@@ -99,19 +104,37 @@ export function TypingLine({
         arabic = true;
         continue;
       }
+      const pos = s.pos;
       const r = typeChar(s, ch, opts, now);
       s = r.state;
-      if (r.result === "wrong") wrong = true;
+      if (r.result === "wrong") wrong = { pos, char: ch };
+      if (r.result === "correct" || r.result === "done") correct = true;
       if (r.result === "done") break;
     }
     stateRef.current = s;
     setState(s);
     setLastKeyAt(now);
     setArabicHint(arabic);
-    if (wrong) setShakeKey((k) => k + 1);
-    if (s.finishedAt !== null && !doneRef.current) {
+
+    const finishing = s.finishedAt !== null && !doneRef.current;
+    if (prefs.typingSounds) {
+      if (finishing) sfx.done();
+      else if (wrong) sfx.wrong();
+      else if (correct) sfx.key();
+    }
+    window.clearTimeout(flashTimer.current);
+    if (wrong) {
+      setShakeKey((k) => k + 1);
+      setFlash({ id: now, ...wrong });
+      flashTimer.current = window.setTimeout(() => setFlash(null), 1200);
+    } else if (correct) {
+      setFlash(null);
+    }
+
+    if (finishing) {
       doneRef.current = true;
-      onDone({ accuracy: accuracy(s), wpm: wpm(s, s.finishedAt), ms: s.finishedAt - (s.startedAt ?? s.finishedAt) });
+      const end = s.finishedAt ?? now;
+      onDone({ accuracy: accuracy(s), wpm: wpm(s, end), ms: end - (s.startedAt ?? end) });
     }
   }
 
@@ -130,6 +153,9 @@ export function TypingLine({
   const idx = currentWordIndex(state.target, state.pos);
   const hint = idx >= 0 ? hints[idx] : undefined;
   const done = state.finishedAt !== null;
+  const missed = useMemo(() => new Set(state.missed), [state.missed]);
+
+  useEffect(() => () => window.clearTimeout(flashTimer.current), []);
   const textSize = size === "xl" ? "text-3xl sm:text-4xl lg:text-5xl" : "text-2xl sm:text-3xl";
 
   const parts = useMemo(() => {
@@ -178,6 +204,11 @@ export function TypingLine({
             )}
           </span>
         )}
+        {flash && flash.pos === state.pos && !done && (
+          <span key={flash.id} dir="rtl" className="chip animate-pop border-danger/50 bg-danger/10 text-danger">
+            ✗ كتبت <span className="en font-semibold">«{flash.char === " " ? "مسافة" : flash.char}»</span>
+          </span>
+        )}
         {arabicHint && (
           <span dir="rtl" className="chip border-flame/40 text-flame">
             حوّل لوحة المفاتيح إلى الإنجليزية
@@ -196,15 +227,28 @@ export function TypingLine({
                   const i = p.start + j;
                   const typed = i < state.pos;
                   const current = i === state.pos && !done;
-                  const cls = typed
-                    ? done
-                      ? "text-accent"
-                      : "text-text"
+                  const wrongHere = current && flash?.pos === i;
+                  // Letters that needed more than one try stay red, so mistakes are easy to spot.
+                  const color = typed
+                    ? missed.has(i)
+                      ? "text-danger"
+                      : done
+                        ? "text-accent"
+                        : "text-text"
                     : hidden
-                      ? "text-transparent border-b-2 border-faint"
-                      : "text-faint";
+                      ? "text-transparent"
+                      : wrongHere
+                        ? "text-danger"
+                        : "text-faint";
+                  const mark = current
+                    ? wrongHere
+                      ? "rounded-sm border-b-[3px] border-danger bg-danger/25"
+                      : "border-b-[3px] border-accent"
+                    : !typed && hidden
+                      ? "border-b-2 border-faint"
+                      : "";
                   return (
-                    <span key={i} className={`${cls} ${current ? "border-b-[3px] border-accent" : ""}`}>
+                    <span key={i} className={`${color} ${mark}`}>
                       {ch}
                     </span>
                   );
@@ -217,7 +261,12 @@ export function TypingLine({
 
       <div className="mt-5 flex flex-wrap gap-2 text-sm" dir="rtl" data-tour="live-stats">
         <span className="chip">
-          الدقة <span className="en text-text">{Math.round(accuracy(state) * 100)}%</span>
+          الدقة{" "}
+          <span
+            className={`en ${accuracy(state) >= 0.95 ? "text-ok" : accuracy(state) >= 0.8 ? "text-text" : "text-danger"}`}
+          >
+            {Math.round(accuracy(state) * 100)}%
+          </span>
         </span>
         <span className="chip">
           <span className="en text-text">{wpm(state, state.finishedAt ?? lastKeyAt)}</span> كلمة/دقيقة

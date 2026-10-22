@@ -144,7 +144,7 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
         total={words.length}
         prefs={prefs}
         setPrefs={setPrefs}
-        options={["showTranslation", "ignoreCase", "autoPlay", "rate"]}
+        options={["showTranslation", "ignoreCase", "autoPlay", "typingSounds", "rate"]}
         settingsOpen={settingsOpen}
         onSettingsChange={setSettingsOpen}
       />

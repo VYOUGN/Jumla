@@ -18,6 +18,8 @@ export type TypingState = {
   finishedAt: number | null;
   /** Punctuation just filled in for the learner; typing it anyway is not a mistake. */
   skipped: string;
+  /** Positions where a wrong key was pressed before the right one. */
+  missed: number[];
 };
 
 export type TypeResult = "correct" | "wrong" | "ignored" | "done";
@@ -41,7 +43,7 @@ function skipAhead(state: TypingState, opts: TypingOptions): TypingState {
 export function createTyping(target: string, opts: TypingOptions): TypingState {
   const clean = normalizeApostrophes(target).replace(/\s+/g, " ").trim();
   return skipAhead(
-    { target: clean, pos: 0, keystrokes: 0, errors: 0, startedAt: null, finishedAt: null, skipped: "" },
+    { target: clean, pos: 0, keystrokes: 0, errors: 0, startedAt: null, finishedAt: null, skipped: "", missed: [] },
     opts,
   );
 }
@@ -74,8 +76,9 @@ export function typeChar(
   const expected = state.target[state.pos];
 
   if (!same(expected, input, opts)) {
+    const missed = state.missed.includes(state.pos) ? state.missed : [...state.missed, state.pos];
     return {
-      state: { ...state, startedAt, keystrokes: state.keystrokes + 1, errors: state.errors + 1, skipped: "" },
+      state: { ...state, startedAt, keystrokes: state.keystrokes + 1, errors: state.errors + 1, skipped: "", missed },
       result: "wrong",
     };
   }
