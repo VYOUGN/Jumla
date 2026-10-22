@@ -57,6 +57,8 @@ export type Profile = {
   id: string;
   display_name: string;
   role: "admin" | "member";
+  /** Guided tours already finished ("home", "lesson"). Missing until migration 0006 runs. */
+  tours_seen?: string[];
 };
 
 export type UserStats = {

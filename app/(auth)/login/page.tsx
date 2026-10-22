@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HashNotice } from "@/components/HashNotice";
 import { safeNext } from "@/lib/auth-errors";
 import { LoginForm } from "./LoginForm";
 
@@ -11,6 +12,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <>
       <h1 className="mb-1 text-2xl font-bold">أهلاً بعودتك</h1>
       <p className="mb-6 text-muted">سجّل الدخول لتكمل من حيث توقفت.</p>
+      <HashNotice />
       {error === "link" && (
         <p className="mb-4 rounded-lg bg-danger/10 p-3 text-sm text-danger">الرابط غير صالح أو انتهت صلاحيته.</p>
       )}

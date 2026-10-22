@@ -23,6 +23,8 @@ type Props = {
   /** Hide letters until they are typed (listening / dictation). */
   hidden?: boolean;
   size?: "lg" | "xl";
+  /** True while a dialog or tour is on top: keys are not taken as typing. */
+  paused?: boolean;
   onDone: (r: TypingResult) => void;
   onReplay?: () => void;
   onEnter?: () => void;
@@ -32,7 +34,17 @@ type Props = {
  * One line to type. Mount it with key={item.id}: it keeps its own progress and
  * calls onDone once when the last letter is typed.
  */
-export function TypingLine({ target, hints = [], prefs, hidden = false, size = "xl", onDone, onReplay, onEnter }: Props) {
+export function TypingLine({
+  target,
+  hints = [],
+  prefs,
+  hidden = false,
+  size = "xl",
+  paused = false,
+  onDone,
+  onReplay,
+  onEnter,
+}: Props) {
   const opts: TypingOptions = useMemo(
     () => ({ ignoreCase: prefs.ignoreCase, skipPunctuation: prefs.skipPunctuation }),
     [prefs.ignoreCase, prefs.skipPunctuation],
@@ -56,11 +68,18 @@ export function TypingLine({ target, hints = [], prefs, hidden = false, size = "
   }, [target, opts]);
 
   const focus = useCallback(() => inputRef.current?.focus({ preventScroll: true }), []);
+  const pausedRef = useRef(paused);
 
   useEffect(() => {
-    focus();
+    pausedRef.current = paused;
+    if (paused) inputRef.current?.blur();
+    else focus();
+  }, [paused, focus]);
+
+  useEffect(() => {
     // Typing anywhere on the page goes to the line, even after clicking a button.
     const onKey = (e: KeyboardEvent) => {
+      if (pausedRef.current) return;
       const el = document.activeElement;
       const editing = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement;
       if (!editing && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) focus();
@@ -70,6 +89,7 @@ export function TypingLine({ target, hints = [], prefs, hidden = false, size = "
   }, [focus]);
 
   function handle(text: string) {
+    if (pausedRef.current) return;
     let s = stateRef.current;
     let wrong = false;
     let arabic = false;
@@ -147,7 +167,7 @@ export function TypingLine({ target, hints = [], prefs, hidden = false, size = "
         dir="ltr"
       />
 
-      <div className="mb-4 flex min-h-8 items-center gap-2" dir="ltr">
+      <div className="mb-4 flex min-h-8 items-center gap-2" dir="ltr" data-tour={prefs.showHints ? "hint" : undefined}>
         {prefs.showHints && hint && !done && (
           <span className="chip animate-pop border-accent/30" key={idx}>
             <span className="en font-semibold text-text">{hint.w}</span>
@@ -165,7 +185,7 @@ export function TypingLine({ target, hints = [], prefs, hidden = false, size = "
         )}
       </div>
 
-      <p className={`en ${textSize} leading-[1.35] font-semibold tracking-tight`} aria-live="polite">
+      <p className={`en ${textSize} leading-[1.35] font-semibold tracking-tight`} aria-live="polite" data-tour="sentence">
         <span key={shakeKey} className={shakeKey ? "inline animate-shake" : "inline"}>
           {parts.map((p) =>
             p.space ? (
@@ -195,7 +215,7 @@ export function TypingLine({ target, hints = [], prefs, hidden = false, size = "
         </span>
       </p>
 
-      <div className="mt-5 flex flex-wrap gap-2 text-sm" dir="rtl">
+      <div className="mt-5 flex flex-wrap gap-2 text-sm" dir="rtl" data-tour="live-stats">
         <span className="chip">
           الدقة <span className="en text-text">{Math.round(accuracy(state) * 100)}%</span>
         </span>

@@ -25,16 +25,18 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
             <Logo />
           </div>
           <div className="ms-auto flex items-center gap-2">
-            <span className="hidden sm:inline-flex">
+            <span className="hidden sm:inline-flex" data-tour="sync">
               <SyncIndicator />
             </span>
-            <StatBadges stats={stats} />
+            <span className="flex items-center gap-2" data-tour="badges">
+              <StatBadges stats={stats} />
+            </span>
             {isAdmin && (
-              <Link href="/admin" className="chip border-accent/40 text-accent lg:hidden">
+              <Link href="/admin" className="chip border-accent/40 text-accent lg:hidden" data-tour="admin-mobile">
                 <IconShield /> المدير
               </Link>
             )}
-            <Link href="/account" className="chip lg:hidden" aria-label="حسابي">
+            <Link href="/account" className="chip lg:hidden" aria-label="حسابي" data-tour="account-mobile">
               <IconUser />
             </Link>
           </div>

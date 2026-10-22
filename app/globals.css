@@ -46,13 +46,15 @@ body {
   background: color-mix(in oklab, var(--color-accent) 35%, transparent);
 }
 
+/* Shared building blocks. They live in the components layer so Tailwind
+   utilities (text-accent, border-danger, pl-11, ...) can still override them. */
+@layer components {
 .en {
   direction: ltr;
   unicode-bidi: isolate;
   font-family: var(--font-en);
 }
 
-/* Small set of shared building blocks */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -130,4 +132,5 @@ body {
   padding: 0.2rem 0.65rem;
   font-size: 0.8rem;
   color: var(--color-muted);
+}
 }

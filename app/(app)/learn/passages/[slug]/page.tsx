@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "نص استماع" };
 
 export default async function PassagePlayerPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const { supabase, user } = await requireViewer();
+  const { supabase, user, profile } = await requireViewer();
   const data = await loadPlayer(supabase, user.id, "passage", slug);
   if (!data) notFound();
   const done = new Set(data.doneIds);
@@ -23,6 +23,7 @@ export default async function PassagePlayerPage({ params }: { params: Promise<{ 
       startAt={resumeIndex(data.cursor, data.sentences.length)}
       backHref="/learn/passages"
       nextHref={await nextUnitHref(supabase, data.unit)}
+      toursSeen={profile.tours_seen ?? []}
     />
   );
 }

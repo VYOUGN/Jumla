@@ -796,6 +796,12 @@ grant insert, update on public.reports to authenticated;
 -- Functions used inside row level security policies run as the caller.
 grant execute on function public.is_admin() to authenticated;
 
+-- ===== 0006_tours.sql =====
+-- Jumla: remember which guided tours each person has finished, across devices.
+-- A learner updates their own row (RLS "profiles: self or admin update" and the
+-- table-level UPDATE grant from 0005 already cover the new column).
+alter table public.profiles add column if not exists tours_seen text[] not null default '{}';
+
 -- ===== ✏️ Settings: edit these two values before running =====
 update public.app_settings set value = 'you@example.com' where key = 'admin_emails' and value = '';
 update public.app_settings set value = 'change-me' where key = 'invite_code' and value = '';

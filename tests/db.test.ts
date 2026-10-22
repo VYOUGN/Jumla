@@ -272,6 +272,12 @@ describe("row level security", () => {
     expect(p.rows[0]).toEqual({ display_name: "New name", role: "member" });
   });
 
+  it("lets a member record the guided tours they finished", async () => {
+    await as(member, () => db.query("update public.profiles set tours_seen = array['home'] where id = auth.uid()"));
+    const p = await db.query<{ tours_seen: string[] }>("select tours_seen from public.profiles where id = $1", [member]);
+    expect(p.rows[0].tours_seen).toEqual(["home"]);
+  });
+
   it("keeps at least one admin", async () => {
     await as(admin, async () => {
       await expect(db.query("update public.profiles set role = 'member' where id = auth.uid()")).rejects.toThrow(/last admin/);

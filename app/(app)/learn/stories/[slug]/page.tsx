@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "قصة" };
 
 export default async function StoryPlayerPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const { supabase, user } = await requireViewer();
+  const { supabase, user, profile } = await requireViewer();
   const data = await loadPlayer(supabase, user.id, "story", slug);
   if (!data) notFound();
   const done = new Set(data.doneIds);
@@ -23,6 +23,7 @@ export default async function StoryPlayerPage({ params }: { params: Promise<{ sl
       startAt={resumeIndex(data.cursor, data.sentences.length)}
       backHref="/learn/stories"
       nextHref={await nextUnitHref(supabase, data.unit)}
+      toursSeen={profile.tours_seen ?? []}
     />
   );
 }

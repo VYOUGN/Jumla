@@ -2,24 +2,30 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { PasswordField } from "@/components/PasswordField";
 import { authErrorAr } from "@/lib/auth-errors";
+import { MIN_PASSWORD_LENGTH, newPasswordProblem, PASSWORD_MESSAGES } from "@/lib/passwords";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 export function RegisterForm() {
   const router = useRouter();
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
 
+  const confirmState = confirm === "" ? null : confirm === password ? "match" : "mismatch";
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const code = String(form.get("code")).trim();
-    const password = String(form.get("password"));
-    if (password.length < 8) {
-      setError("كلمة المرور يجب أن تكون 8 أحرف على الأقل.");
+    const problem = newPasswordProblem(password, confirm);
+    if (problem) {
+      setError(problem);
       return;
     }
+    const form = new FormData(e.currentTarget);
+    const code = String(form.get("code")).trim();
     setBusy(true);
     setError("");
     const supabase = supabaseBrowser();
@@ -75,21 +81,24 @@ export function RegisterForm() {
         </label>
         <input id="email" name="email" type="email" required autoComplete="email" className="input en" dir="ltr" />
       </div>
-      <div>
-        <label className="label" htmlFor="password">
-          كلمة المرور (8 أحرف على الأقل)
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          minLength={8}
-          autoComplete="new-password"
-          className="input en"
-          dir="ltr"
-        />
-      </div>
+      <PasswordField
+        label="كلمة المرور"
+        name="password"
+        value={password}
+        onChange={setPassword}
+        autoComplete="new-password"
+        hint={`${MIN_PASSWORD_LENGTH} أحرف على الأقل، بالإنجليزي.`}
+      />
+      <PasswordField
+        label="تأكيد كلمة المرور"
+        name="confirm"
+        value={confirm}
+        onChange={setConfirm}
+        autoComplete="new-password"
+        hint="اكتب نفس كلمة المرور مرة ثانية."
+        error={confirmState === "mismatch" ? PASSWORD_MESSAGES.mismatch : null}
+        success={confirmState === "match" ? "متطابقتان" : null}
+      />
       <div>
         <label className="label" htmlFor="code">
           كود الدعوة

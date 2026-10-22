@@ -10,3 +10,10 @@ export async function updateDisplayName(formData: FormData) {
   await supabase.from("profiles").update({ display_name: name }).eq("id", user.id);
   revalidatePath("/", "layout");
 }
+
+/** Forget which guided tours were seen, so they play again on the next visit. */
+export async function resetTours() {
+  const { supabase, user } = await requireViewer();
+  await supabase.from("profiles").update({ tours_seen: [] }).eq("id", user.id);
+  revalidatePath("/", "layout");
+}

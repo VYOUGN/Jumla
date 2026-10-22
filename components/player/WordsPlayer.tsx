@@ -35,6 +35,7 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
   const [reveal, setReveal] = useState(false);
   const [justDone, setJustDone] = useState(false);
   const [summary, setSummary] = useState<SummaryData | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const results = useRef<TypingResult[]>([]);
   const startedAt = useRef(0);
   const advance = useRef<number | undefined>(undefined);
@@ -57,13 +58,13 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
 
   // Enter moves from studying a word to typing it.
   useEffect(() => {
-    if (phase !== "study") return;
+    if (phase !== "study" || settingsOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Enter") setPhase("type");
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [phase]);
+  }, [phase, settingsOpen]);
 
   function begin(from: number) {
     results.current = [];
@@ -143,7 +144,9 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
         total={words.length}
         prefs={prefs}
         setPrefs={setPrefs}
-        options={["showTranslation", "ignoreCase"]}
+        options={["showTranslation", "ignoreCase", "autoPlay", "rate"]}
+        settingsOpen={settingsOpen}
+        onSettingsChange={setSettingsOpen}
       />
       <main className="mx-auto max-w-2xl px-4 py-10 sm:py-16">
         {phase === "study" ? (
@@ -175,6 +178,7 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
               target={word.word}
               prefs={{ ...prefs, showHints: false, skipPunctuation: true }}
               hidden={!reveal}
+              paused={settingsOpen}
               onDone={onDone}
               onReplay={() => say(word.word)}
               onEnter={() => justDone && next()}

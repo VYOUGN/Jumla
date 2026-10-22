@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { xpFor } from "@/lib/gamification";
 import { usePrefs } from "@/lib/prefs";
 import { speak, speechSupported, stopSpeaking } from "@/lib/speech";
@@ -10,6 +10,8 @@ import { countWords } from "@/lib/words";
 import { Cover } from "../Cover";
 import { IconEye, IconEyeOff, IconPlay, IconVolume } from "../icons";
 import { useProgress } from "../ProgressProvider";
+import { lessonTourSteps } from "../tour/lessonSteps";
+import { Tour, useTour } from "../tour/Tour";
 import { TypingLine, type TypingResult } from "../typing/TypingLine";
 import { PlayerChrome } from "./PlayerChrome";
 import { ReportButton } from "./ReportButton";
@@ -25,11 +27,13 @@ type Props = {
   startAt: number;
   backHref: string;
   nextHref: string | null;
+  /** Guided tours this person has already finished. */
+  toursSeen: string[];
 };
 
 type Phase = "ready" | "typing" | "questions" | "summary";
 
-export function LessonPlayer({ mode, unit, sentences, questions, doneCount, startAt, backHref, nextHref }: Props) {
+export function LessonPlayer({ mode, unit, sentences, questions, doneCount, startAt, backHref, nextHref, toursSeen }: Props) {
   const router = useRouter();
   const { record, flush } = useProgress();
   const [prefs, setPrefs] = usePrefs();
@@ -41,6 +45,9 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [listenOnly, setListenOnly] = useState(mode === "passage");
   const [playingAll, setPlayingAll] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const tour = useTour("lesson", toursSeen.includes("lesson"), phase === "typing");
+  const tourSteps = useMemo(() => lessonTourSteps(mode), [mode]);
 
   const results = useRef<TypingResult[]>([]);
   const answers = useRef<boolean[]>([]);
@@ -198,7 +205,9 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
           total={questions.length}
           prefs={prefs}
           setPrefs={setPrefs}
-          options={[]}
+          options={["autoPlay", "rate"]}
+          settingsOpen={settingsOpen}
+          onSettingsChange={setSettingsOpen}
         />
         <main className="mx-auto max-w-2xl px-4 py-10">
           <p className="mb-2 text-sm text-muted">سؤال فهم</p>
@@ -246,19 +255,30 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
         total={sentences.length}
         prefs={prefs}
         setPrefs={setPrefs}
-        options={mode === "passage" ? ["showTranslation", "showHints", "ignoreCase", "skipPunctuation"] : undefined}
+        options={
+          mode === "passage"
+            ? ["showTranslation", "showHints", "ignoreCase", "skipPunctuation", "autoPlay", "rate"]
+            : undefined
+        }
+        settingsOpen={settingsOpen}
+        onSettingsChange={setSettingsOpen}
+        onHelp={tour.start}
         right={
           mode === "passage" ? (
             <button
-              className={`chip ${listenOnly ? "text-accent" : ""}`}
+              className={`chip ${listenOnly ? "border-accent/40 text-accent" : ""}`}
               onClick={() => setListenOnly((v) => !v)}
-              title={listenOnly ? "النص مخفي: اكتب ما تسمعه" : "النص ظاهر"}
+              title={listenOnly ? "النص مخفي: اكتب ما تسمعه. اضغط لإظهاره" : "النص ظاهر: اضغط لإخفائه"}
+              aria-pressed={!listenOnly}
+              data-tour="hide-text"
             >
               {listenOnly ? <IconEyeOff /> : <IconEye />}
+              <span className="hidden md:inline">{listenOnly ? "النص مخفي" : "النص ظاهر"}</span>
             </button>
           ) : null
         }
       />
+      <Tour steps={tourSteps} open={tour.open} onClose={tour.close} />
       <main className="mx-auto grid max-w-5xl items-start gap-8 px-4 py-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:py-14">
         <Cover
           theme={unit.theme}
@@ -274,18 +294,23 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
             hints={sentence.word_hints}
             prefs={prefs}
             hidden={hidden}
+            paused={tour.open || settingsOpen}
             onDone={onSentenceDone}
             onReplay={() => say(sentence.text_en)}
             onEnter={() => justDone && next()}
           />
           {prefs.showTranslation && sentence.text_ar && (
-            <p className="mt-6 text-lg leading-8 text-muted">{sentence.text_ar}</p>
+            <p className="mt-6 text-lg leading-8 text-muted" data-tour="translation">
+              {sentence.text_ar}
+            </p>
           )}
           <div className="mt-8 flex flex-wrap items-center gap-2">
-            <button className="btn btn-ghost btn-sm" onClick={() => say(sentence.text_en)}>
+            <button className="btn btn-ghost btn-sm" onClick={() => say(sentence.text_en)} data-tour="listen">
               <IconVolume /> استمع <kbd className="en hidden text-xs text-muted sm:inline">Shift</kbd>
             </button>
-            <ReportButton unitId={unit.id} itemId={sentence.id} itemType="sentence" context={sentence.text_en} />
+            <span data-tour="report">
+              <ReportButton unitId={unit.id} itemId={sentence.id} itemType="sentence" context={sentence.text_en} />
+            </span>
             {justDone && (
               <button className="btn btn-primary btn-sm ms-auto animate-pop" onClick={next}>
                 التالي <kbd className="en text-xs">Enter</kbd>

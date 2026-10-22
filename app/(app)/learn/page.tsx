@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { Missions } from "@/components/Missions";
+import { HomeTour } from "@/components/tour/HomeTour";
 import { UnitTile } from "@/components/UnitGrid";
 import { getStats, requireViewer } from "@/lib/auth";
 import { listUnitCards } from "@/lib/content";
@@ -29,7 +30,8 @@ export default async function LearnHome() {
     <AppShell>
       <h1 className="mb-6 text-2xl font-bold sm:text-3xl">مرحباً، {profile.display_name} 👋</h1>
 
-      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <HomeTour seen={(profile.tours_seen ?? []).includes("home")} isAdmin={profile.role === "admin"} />
+      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4" data-tour="stats">
         {tiles.map((t) => (
           <div key={t.label} className="card p-4">
             <div className="en text-3xl font-bold">{t.value.toLocaleString("en")}</div>
@@ -39,7 +41,7 @@ export default async function LearnHome() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <section>
+        <section data-tour="next-up">
           <h2 className="mb-4 text-lg font-bold">التالي لك</h2>
           {inProgress.length + fresh.length === 0 ? (
             <p className="card p-6 text-muted">
@@ -60,7 +62,7 @@ export default async function LearnHome() {
             </div>
           )}
         </section>
-        <aside>
+        <aside data-tour="missions">
           <Missions />
         </aside>
       </div>

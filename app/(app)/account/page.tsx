@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { AppShell, PageTitle } from "@/components/AppShell";
+import { HashNotice } from "@/components/HashNotice";
 import { getStats, requireViewer } from "@/lib/auth";
 import { updateDisplayName } from "./actions";
-import { PasswordForm, SignOutButton, SyncPanel } from "./AccountClient";
+import { EmailForm, PasswordForm, SignOutButton, SyncPanel, TourReplay } from "./AccountClient";
 
 export const metadata: Metadata = { title: "حسابي" };
 
@@ -12,6 +13,7 @@ export default async function AccountPage() {
   return (
     <AppShell>
       <PageTitle title="حسابي" subtitle={user.email ?? undefined} />
+      <HashNotice />
       <div className="grid gap-5 md:grid-cols-2">
         <form action={updateDisplayName} className="card space-y-3 p-5">
           <h2 className="font-bold">اسمك الظاهر لأصحابك</h2>
@@ -19,6 +21,8 @@ export default async function AccountPage() {
           <button className="btn btn-ghost btn-sm">حفظ</button>
         </form>
         <SyncPanel />
+        <EmailForm current={user.email ?? ""} pending={user.new_email ?? null} />
+        <PasswordForm />
         <section className="card p-5">
           <h2 className="mb-3 font-bold">إحصائياتك</h2>
           <dl className="grid grid-cols-2 gap-3 text-sm">
@@ -32,7 +36,7 @@ export default async function AccountPage() {
             <dd className="en">{stats?.longest_streak ?? 0}</dd>
           </dl>
         </section>
-        <PasswordForm />
+        <TourReplay />
       </div>
       <div className="mt-8">
         <SignOutButton />

@@ -10,7 +10,9 @@ export const getViewer = cache(async () => {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data, error } = await supabase.from("profiles").select("id, display_name, role").eq("id", user.id).maybeSingle();
+  // select("*") rather than a column list, so a column added by a newer
+  // migration can't break sign-in on a database that hasn't run it yet.
+  const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
   // Without this log a database problem quietly shows everyone as a regular member.
   if (error) console.error("[jumla] could not read the profile:", error.message);
   const profile: Profile = (data as Profile | null) ?? {

@@ -4,6 +4,9 @@ export function authErrorAr(message: string | undefined): string {
   if (m.includes("invalid login credentials")) return "الإيميل أو كلمة المرور غير صحيحة.";
   if (m.includes("email not confirmed")) return "أكّد إيميلك أولاً من الرسالة التي وصلتك.";
   if (m.includes("already registered") || m.includes("already been registered")) return "هذا الإيميل مسجّل مسبقاً. سجّل الدخول بدلاً من ذلك.";
+  if (m.includes("different from the old password")) return "كلمة المرور الجديدة لازم تختلف عن القديمة.";
+  if (m.includes("email") && m.includes("different")) return "هذا هو إيميلك الحالي.";
+  if (m.includes("email") && m.includes("invalid")) return "الإيميل غير صحيح.";
   if (m.includes("password") && (m.includes("at least") || m.includes("weak") || m.includes("short")))
     return "كلمة المرور ضعيفة. استخدم 8 أحرف على الأقل.";
   if (m.includes("database error saving new user") || m.includes("invalid_invite_code")) return "كود الدعوة غير صحيح.";
