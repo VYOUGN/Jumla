@@ -49,6 +49,8 @@ export async function saveUnit(input: UnitInput): Promise<ActionResult> {
   if (!slug) return { ok: false, error: "الرابط (slug) مطلوب: حروف إنجليزية وأرقام وشرطات." };
   if (!input.title_en.trim()) return { ok: false, error: "العنوان الإنجليزي مطلوب." };
   if (!UNIT_TYPES.includes(input.type) || !LEVELS.includes(input.level)) return { ok: false, error: "قيمة غير صالحة." };
+  const cover = input.cover_url?.trim() || null;
+  if (cover && !/^https:\/\/[^\s"'()<>\\]+$/.test(cover)) return { ok: false, error: "رابط صورة الغلاف لازم يبدأ بـ https://" };
 
   const row = {
     type: input.type,
@@ -60,7 +62,7 @@ export async function saveUnit(input: UnitInput): Promise<ActionResult> {
     level: input.level,
     theme: input.theme,
     emoji: input.emoji.trim() || "📖",
-    cover_url: input.cover_url?.trim() || null,
+    cover_url: cover,
     sort_order: Number.isFinite(input.sort_order) ? Math.round(input.sort_order) : 0,
     published: input.published,
   };
@@ -206,7 +208,9 @@ export async function deleteMember(userId: string): Promise<ActionResult> {
 export async function saveSetting(key: "invite_code" | "admin_emails", value: string): Promise<ActionResult> {
   const { supabase } = await requireAdmin();
   const v = value.trim();
-  if (key === "invite_code" && v.length < 4) return { ok: false, error: "الكود يجب أن يكون 4 أحرف على الأقل." };
+  // Anyone on the internet can try codes at the sign-up form, so keep them long.
+  if (key === "invite_code" && v.length < 10)
+    return { ok: false, error: "الكود يجب أن يكون 10 أحرف على الأقل. استخدم زر «كود عشوائي» لكود قوي." };
   const { error } = await supabase.from("app_settings").update({ value: v, updated_at: new Date().toISOString() }).eq("key", key);
   if (error) return fail(error);
   revalidatePath("/admin", "layout");

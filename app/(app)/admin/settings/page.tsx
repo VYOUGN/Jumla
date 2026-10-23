@@ -17,14 +17,14 @@ export default async function SettingsPage() {
         <SettingForm
           settingKey="invite_code"
           title="كود الدعوة"
-          help="أعطِ هذا الكود لأصحابك ليسجّلوا. تغييره لا يؤثر على من سجّل قبل."
+          help="أعطِ هذا الكود لأصحابك ليسجّلوا. تغييره لا يؤثر على من سجّل قبل. خلّه طويلاً (10 أحرف أو أكثر) عشان ما ينخمّن، وزر «كود عشوائي» يعطيك كوداً قوياً."
           value={settings.get("invite_code") ?? ""}
           generate
         />
         <SettingForm
           settingKey="admin_emails"
           title="إيميلات المدراء"
-          help="أي حساب جديد بهذه الإيميلات يصبح مديراً تلقائياً. افصل بينها بفاصلة."
+          help="تُستخدم فقط لإنشاء أول مدير في الموقع. بعدها أي مدير جديد تعيّنه من صفحة «المستخدمون»، فما يقدر أحد يصير مديراً بمجرد التسجيل بإيميل من هذه القائمة."
           value={settings.get("admin_emails") ?? ""}
         />
         <section className="card p-5 md:col-span-2">

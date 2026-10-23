@@ -1,5 +1,8 @@
-// npm run db:migrate        -> applies new files in supabase/migrations and the settings from .env.local
+// npm run db:migrate        -> applies new files in supabase/migrations; on a fresh database it also
+//                              saves ADMIN_EMAIL and INVITE_CODE from .env.local
 // npm run db:seed           -> the same, then inserts the starter content (never overwrites edits)
+// Flags: --up-to 0008       -> stop after migrations whose number is <= 0008
+//        --reset-settings   -> overwrite the invite code / admin emails with the .env.local values
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { connectDb } from "./db-url";
@@ -21,8 +24,14 @@ async function main() {
       create table if not exists jumla_meta.migrations (name text primary key, applied_at timestamptz not null default now());`);
     const done = new Set((await db.query<{ name: string }>("select name from jumla_meta.migrations")).rows.map((r) => r.name));
 
+    const upToIndex = process.argv.indexOf("--up-to");
+    const upTo = upToIndex >= 0 ? process.argv[upToIndex + 1] : undefined;
     for (const m of migrationFiles()) {
       if (done.has(m.name)) continue;
+      if (upTo && m.name.slice(0, upTo.length) > upTo) {
+        console.log(`Waiting: ${m.name} (after --up-to ${upTo})`);
+        continue;
+      }
       process.stdout.write(`Applying ${m.name} ... `);
       await db.query("begin");
       try {
@@ -36,18 +45,32 @@ async function main() {
       }
     }
 
+    // Settings from .env.local only fill empty values, so changes made later in the
+    // admin panel survive every run (unless --reset-settings says otherwise).
+    const reset = process.argv.includes("--reset-settings");
+    const onlyIfEmpty = reset ? "" : " and value = ''";
     const adminEmail = process.env.ADMIN_EMAIL?.trim();
     if (adminEmail && adminEmail !== "you@example.com") {
-      await db.query("update public.app_settings set value = $1, updated_at = now() where key = 'admin_emails'", [adminEmail]);
-      await db.query(
-        "update public.profiles set role = 'admin' where id in (select id from auth.users where public.is_admin_email(email))",
+      const r = await db.query(
+        `update public.app_settings set value = $1, updated_at = now() where key = 'admin_emails'${onlyIfEmpty}`,
+        [adminEmail],
       );
-      console.log(`Admin email(s): ${adminEmail}`);
+      // Promote matching accounts only while the site has no admin yet (or when forced).
+      await db.query(
+        `update public.profiles set role = 'admin'
+         where id in (select id from auth.users where public.is_admin_email(email))
+           and ($1 or not exists (select 1 from public.profiles where role = 'admin'))`,
+        [reset],
+      );
+      if (r.rowCount) console.log("Admin email(s) saved.");
     }
     const invite = process.env.INVITE_CODE?.trim();
     if (invite && invite !== "change-me") {
-      await db.query("update public.app_settings set value = $1, updated_at = now() where key = 'invite_code'", [invite]);
-      console.log("Invite code saved.");
+      const r = await db.query(
+        `update public.app_settings set value = $1, updated_at = now() where key = 'invite_code'${onlyIfEmpty}`,
+        [invite],
+      );
+      if (r.rowCount) console.log("Invite code saved.");
     }
     const current = await db.query<{ value: string }>("select value from public.app_settings where key = 'invite_code'");
     if (!current.rows[0]?.value) {

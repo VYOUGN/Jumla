@@ -25,7 +25,14 @@ export function ReportButton({ unitId, itemId, itemType, context }: Props) {
     setState("sending");
     const { error } = await supabaseBrowser()
       .from("reports")
-      .insert({ unit_id: unitId, item_id: itemId, item_type: itemType, message: `${message}\n\n— ${context}`, user_id: userId });
+      // The database allows 1000 characters; the quoted sentence must not push a report over it.
+      .insert({
+        unit_id: unitId,
+        item_id: itemId,
+        item_type: itemType,
+        message: `${message}\n\n— ${context}`.slice(0, 1000),
+        user_id: userId,
+      });
     setState(error ? "error" : "sent");
     if (!error) setTimeout(() => setOpen(false), 1200);
   }

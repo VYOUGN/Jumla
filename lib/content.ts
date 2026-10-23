@@ -47,11 +47,17 @@ export async function loadPlayer(
   type: UnitType,
   slug: string,
 ): Promise<PlayerData | null> {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(slug);
+  } catch {
+    return null; // a malformed link like /learn/stories/%E0 is just "not found"
+  }
   const { data: unit } = await supabase
     .from("units")
     .select("*")
     .eq("type", type)
-    .eq("slug", decodeURIComponent(slug))
+    .eq("slug", decoded)
     .eq("archived", false)
     .maybeSingle();
   if (!unit) return null;

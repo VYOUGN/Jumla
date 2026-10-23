@@ -18,7 +18,20 @@ export function authErrorAr(message: string | undefined): string {
   return "حدث خطأ غير متوقع. جرّب مرة أخرى.";
 }
 
-/** Only allow redirects to paths on this site. */
+const SAME_SITE = "http://same-site.invalid";
+
+/**
+ * Only allow redirects to paths on this site. Browsers treat "\" like "/" and
+ * drop tabs/newlines, so "/\evil.com" would become "//evil.com"; resolving
+ * against a placeholder origin and comparing origins catches all of these.
+ */
 export function safeNext(next: string | null | undefined, fallback = "/learn"): string {
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
+  if (!next || !next.startsWith("/") || next.includes("\\")) return fallback;
+  try {
+    const url = new URL(next, SAME_SITE);
+    if (url.origin !== SAME_SITE) return fallback;
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return fallback;
+  }
 }

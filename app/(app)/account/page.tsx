@@ -22,7 +22,7 @@ export default async function AccountPage() {
         </form>
         <SyncPanel />
         <EmailForm current={user.email ?? ""} pending={user.new_email ?? null} />
-        <PasswordForm />
+        <PasswordForm email={user.email ?? ""} />
         <section className="card p-5">
           <h2 className="mb-3 font-bold">إحصائياتك</h2>
           <dl className="grid grid-cols-2 gap-3 text-sm">

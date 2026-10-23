@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-function translate(message: string): { ok: boolean; text: string } {
+// Only messages we recognise are shown. Anything else in the fragment is ignored,
+// so a crafted link can't make the site display text of someone else's choosing.
+function translate(message: string): { ok: boolean; text: string } | null {
   const m = message.toLowerCase();
   if (m.includes("confirmation link accepted"))
     return {
@@ -10,7 +12,7 @@ function translate(message: string): { ok: boolean; text: string } {
       text: "تم تأكيد الرابط الأول ✅ افتح الإيميل الثاني (القديم أو الجديد) واضغط الرابط اللي فيه لإكمال تغيير الإيميل.",
     };
   if (m.includes("expired") || m.includes("invalid")) return { ok: false, text: "الرابط غير صالح أو انتهت صلاحيته. اطلب رابطاً جديداً." };
-  return { ok: true, text: message };
+  return null;
 }
 
 /** Shows the message Supabase puts in the URL fragment after an email link (e.g. #message=...). */

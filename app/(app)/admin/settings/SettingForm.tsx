@@ -25,11 +25,12 @@ export function SettingForm({
     setMsg(r.ok ? { ok: true, text: "تم الحفظ." } : { ok: false, text: r.error });
   }
 
+  // 12 characters from a 32-letter alphabet without look-alikes (0/o, 1/l/i): about 60 bits.
   function random() {
-    const words = ["sun", "tea", "moon", "star", "palm", "sea", "sky", "book"];
-    const pick = () => words[crypto.getRandomValues(new Uint32Array(1))[0] % words.length];
-    const n = (crypto.getRandomValues(new Uint32Array(1))[0] % 900) + 100;
-    setV(`${pick()}-${pick()}-${n}`);
+    const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
+    const bytes = crypto.getRandomValues(new Uint8Array(12));
+    const chars = [...bytes].map((b) => alphabet[b % alphabet.length]).join("");
+    setV(`${chars.slice(0, 4)}-${chars.slice(4, 8)}-${chars.slice(8, 12)}`);
   }
 
   return (

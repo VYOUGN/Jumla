@@ -9,6 +9,9 @@ export const SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
   "";
 
+/** Session cookies are only sent over HTTPS in production (localhost stays HTTP). */
+export const COOKIE_OPTIONS = { secure: process.env.NODE_ENV === "production" };
+
 /** False until .env.local (or the Vercel project) has the Supabase keys. */
 export function hasSupabaseEnv(): boolean {
   return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes("YOUR-PROJECT"));

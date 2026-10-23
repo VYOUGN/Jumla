@@ -32,13 +32,8 @@ export function RegisterForm() {
     setError("");
     const supabase = supabaseBrowser();
 
-    const { data: valid, error: codeError } = await supabase.rpc("check_invite_code", { p_code: code });
-    if (codeError || !valid) {
-      setError(codeError ? authErrorAr(codeError.message) : "كود الدعوة غير صحيح.");
-      setBusy(false);
-      return;
-    }
-
+    // The database checks the invite code while creating the account (and Supabase
+    // rate-limits sign-ups), so a wrong code fails here with "كود الدعوة غير صحيح".
     const email = String(form.get("email")).trim();
     const { data, error } = await supabase.auth.signUp({
       email,

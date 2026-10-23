@@ -170,6 +170,7 @@ describe("record_events", () => {
     expect(r.rows[0].cursor).toBe(5);
   });
 
+  // The member has typed five sentences at 100% today in the tests above, so accurate_5 is earned.
   it("pays each daily mission once", async () => {
     const before = Number((await stats(member)).xp);
     const inserted = await record(member, [ev({ kind: "mission", mission: "accurate_5" }), ev({ kind: "mission", mission: "accurate_5" })]);
@@ -185,25 +186,113 @@ describe("record_events", () => {
 });
 
 describe("streaks", () => {
+  // Practice on `practised`, received by the server on `received` (defaults to the same day).
+  async function practiceOn(userId: string, practised: number, received = practised) {
+    await db.query(
+      `insert into public.progress_events (id, user_id, kind, item_id, unit_id, position, accuracy, word_count, xp, local_date, client_ts, created_at)
+       values (gen_random_uuid(), $1, 'sentence', $2, $3, 0, 1, 4, 10, $4::date, $4::timestamptz, $5::timestamptz)`,
+      [userId, sentenceIds[0], unitId, day(practised), day(received)],
+    );
+  }
+
   it("counts days, spends a freeze for one missed day, resets after more, ignores late events", async () => {
     const id = await signUp("streaky@example.com", "let-me-in");
-    for (let d = -30; d <= -24; d++) await record(id, [ev({ local_date: day(d) })]);
+    for (let d = -30; d <= -24; d++) await practiceOn(id, d);
     let s = await stats(id);
     expect(s.current_streak).toBe(7);
     expect(s.freezes).toBe(1);
 
-    await record(id, [ev({ local_date: day(-22) })]); // missed -23, freeze covers it
+    await practiceOn(id, -22); // missed -23, freeze covers it
     s = await stats(id);
     expect(s.current_streak).toBe(8);
     expect(s.freezes).toBe(0);
 
-    await record(id, [ev({ local_date: day(-19) })]); // missed two days, no freeze left
+    await practiceOn(id, -19); // missed two days, no freeze left
     s = await stats(id);
     expect(s.current_streak).toBe(1);
     expect(s.longest_streak).toBe(8);
 
-    await record(id, [ev({ local_date: day(-25) })]); // a late offline event
+    await practiceOn(id, -25, -19); // a late offline event
     expect((await stats(id)).current_streak).toBe(1);
+  });
+
+  it("doesn't build a streak from backdated practice", async () => {
+    const id = await signUp("backdater@example.com", "let-me-in");
+    expect(await record(id, [ev({ item_id: sentenceIds[0], unit_id: unitId, local_date: day(-10) })])).toBe(1);
+    const s = await stats(id);
+    expect(s.current_streak).toBe(0);
+    expect(s.last_active_date).toBeNull();
+  });
+});
+
+describe("cheating and abuse", () => {
+  it("ignores progress on content that doesn't exist", async () => {
+    const missing = "00000000-0000-4000-8000-999999999999";
+    expect(await record(member, [ev({ item_id: missing, unit_id: unitId })])).toBe(0);
+    expect(await record(member, [ev({ item_id: sentenceIds[0], unit_id: missing })])).toBe(0);
+  });
+
+  it("gives full XP at exactly 95% accuracy", async () => {
+    const id = await signUp("precise@example.com", "let-me-in");
+    await record(id, [ev({ item_id: sentenceIds[6], unit_id: unitId, position: 6, accuracy: 0.95 })]);
+    expect((await stats(id)).xp).toBe(10);
+  });
+
+  it("stops paying XP after three completions of the same sentence in a day", async () => {
+    const id = await signUp("grinder@example.com", "let-me-in");
+    for (let i = 0; i < 5; i++) await record(id, [ev({ item_id: sentenceIds[7], unit_id: unitId, position: 7 })]);
+    const s = await stats(id);
+    expect(s.sentences_done).toBe(5);
+    expect(s.xp).toBe(30);
+  });
+
+  it("only pays a mission when that day's practice meets it", async () => {
+    const id = await signUp("claimer@example.com", "let-me-in");
+    expect(await record(id, [ev({ kind: "mission", mission: "sentences_10" })])).toBe(0);
+    const ten = [...sentenceIds, sentenceIds[0]].slice(0, 10);
+    for (const item of ten) await record(id, [ev({ item_id: item, unit_id: unitId })]);
+    expect(await record(id, [ev({ kind: "mission", mission: "sentences_10" })])).toBe(1);
+  });
+
+  it("rejects oversized batches", async () => {
+    const big = Array.from({ length: 501 }, () => ev({ item_id: sentenceIds[0], unit_id: unitId }));
+    await expect(record(member, big)).rejects.toThrow(/too many events/);
+  });
+});
+
+describe("sign-up rules", () => {
+  it("makes only the first account from the admin list an admin", async () => {
+    await db.exec("update public.app_settings set value = 'admin@example.com, late-admin@example.com' where key = 'admin_emails'");
+    await expect(signUp("late-admin@example.com")).rejects.toThrow(/invalid_invite_code/);
+    const id = await signUp("late-admin@example.com", "let-me-in");
+    const p = await db.query<{ role: string }>("select role from public.profiles where id = $1", [id]);
+    expect(p.rows[0].role).toBe("member");
+    await db.exec("update public.app_settings set value = 'admin@example.com' where key = 'admin_emails'");
+  });
+
+  it("keeps display names to 40 characters", async () => {
+    const r = await db.query<{ id: string }>(
+      "insert into auth.users (email, raw_user_meta_data) values ($1, $2::jsonb) returning id",
+      ["longname@example.com", JSON.stringify({ display_name: "x".repeat(200), invite_code: "let-me-in" })],
+    );
+    const id = r.rows[0].id;
+    const p = await db.query<{ display_name: string }>("select display_name from public.profiles where id = $1", [id]);
+    expect(p.rows[0].display_name).toHaveLength(40);
+    await expect(
+      as(id, () => db.query("update public.profiles set display_name = $1 where id = auth.uid()", ["y".repeat(41)])),
+    ).rejects.toThrow(/profiles_display_name_length/);
+  });
+});
+
+describe("function access", () => {
+  it("keeps helper functions private", async () => {
+    await expect(as(null, () => db.query("select public.check_invite_code('let-me-in')"))).rejects.toThrow(/permission denied/);
+    await expect(as(member, () => db.query("select public.is_admin_email('admin@example.com')"))).rejects.toThrow(
+      /permission denied/,
+    );
+    await expect(
+      as(member, () => db.query("select public.mission_done(auth.uid(), current_date, 'xp_100')")),
+    ).rejects.toThrow(/permission denied/);
   });
 });
 

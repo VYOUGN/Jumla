@@ -6,12 +6,27 @@ import { PasswordField } from "@/components/PasswordField";
 import { useProgress } from "@/components/ProgressProvider";
 import { forgetToursOnDevice } from "@/components/tour/Tour";
 import { authErrorAr } from "@/lib/auth-errors";
-import { MIN_PASSWORD_LENGTH, newPasswordProblem, PASSWORD_MESSAGES } from "@/lib/passwords";
+import { MIN_PASSWORD_LENGTH, newPasswordProblem, PASSWORD_MESSAGES, signInPasswordProblem } from "@/lib/passwords";
 import { pendingEvents } from "@/lib/progress/outbox";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { resetTours } from "./actions";
 
 type Msg = { ok: boolean; text: string } | null;
+
+/**
+ * Confirms the person at the keyboard knows the password before a sensitive
+ * change, so someone using an unlocked device can't take the account over.
+ */
+async function verifyCurrentPassword(email: string, password: string): Promise<string | null> {
+  if (!password) return "اكتب كلمة المرور الحالية.";
+  const problem = signInPasswordProblem(password);
+  if (problem) return problem;
+  const { error } = await supabaseBrowser().auth.signInWithPassword({ email, password });
+  if (!error) return null;
+  return error.message.toLowerCase().includes("invalid login credentials")
+    ? "كلمة المرور الحالية غير صحيحة."
+    : authErrorAr(error.message);
+}
 
 function Message({ msg }: { msg: Msg }) {
   if (!msg) return null;
@@ -46,6 +61,7 @@ export function SyncPanel() {
 export function EmailForm({ current, pending }: { current: string; pending: string | null }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [msg, setMsg] = useState<Msg>(null);
   const [busy, setBusy] = useState(false);
 
@@ -57,6 +73,12 @@ export function EmailForm({ current, pending }: { current: string; pending: stri
       return;
     }
     setBusy(true);
+    const wrongPassword = await verifyCurrentPassword(current, password);
+    if (wrongPassword) {
+      setBusy(false);
+      setMsg({ ok: false, text: wrongPassword });
+      return;
+    }
     const { error } = await supabaseBrowser().auth.updateUser(
       { email: next },
       { emailRedirectTo: `${window.location.origin}/auth/callback?next=/account` },
@@ -67,6 +89,7 @@ export function EmailForm({ current, pending }: { current: string; pending: stri
       return;
     }
     setEmail("");
+    setPassword("");
     setMsg({
       ok: true,
       text: "أرسلنا رابط تأكيد إلى إيميلك الجديد، وغالباً رابطاً ثانياً إلى إيميلك الحالي. اضغط الرابط في كل رسالة تصلك، وبعدها يتغيّر الإيميل. حتى ذلك الوقت تبقى تدخل بإيميلك الحالي.",
@@ -98,6 +121,13 @@ export function EmailForm({ current, pending }: { current: string; pending: stri
         className="input en"
         dir="ltr"
       />
+      <PasswordField
+        label="كلمة المرور الحالية (للتأكد أنه أنت)"
+        name="current-password-email"
+        value={password}
+        onChange={setPassword}
+        autoComplete="current-password"
+      />
       <Message msg={msg} />
       <button className="btn btn-ghost btn-sm" disabled={busy}>
         {busy ? "جارٍ الإرسال…" : "غيّر الإيميل"}
@@ -106,7 +136,8 @@ export function EmailForm({ current, pending }: { current: string; pending: stri
   );
 }
 
-export function PasswordForm() {
+export function PasswordForm({ email }: { email: string }) {
+  const [current, setCurrent] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [msg, setMsg] = useState<Msg>(null);
@@ -121,12 +152,19 @@ export function PasswordForm() {
       return;
     }
     setBusy(true);
+    const wrongPassword = await verifyCurrentPassword(email, current);
+    if (wrongPassword) {
+      setBusy(false);
+      setMsg({ ok: false, text: wrongPassword });
+      return;
+    }
     const { error } = await supabaseBrowser().auth.updateUser({ password });
     setBusy(false);
     if (error) {
       setMsg({ ok: false, text: authErrorAr(error.message) });
       return;
     }
+    setCurrent("");
     setPassword("");
     setConfirm("");
     setMsg({ ok: true, text: "تم تغيير كلمة المرور." });
@@ -135,6 +173,13 @@ export function PasswordForm() {
   return (
     <form onSubmit={onSubmit} className="card space-y-3 p-5">
       <h2 className="font-bold">تغيير كلمة المرور</h2>
+      <PasswordField
+        label="كلمة المرور الحالية"
+        name="current-password"
+        value={current}
+        onChange={setCurrent}
+        autoComplete="current-password"
+      />
       <PasswordField
         label="كلمة المرور الجديدة"
         name="password"
