@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { saveUnit, setUnitArchived, type UnitInput } from "@/app/(app)/admin/actions";
+import { saveUnit, setUnitArchived, type UnitInput } from "@/app/(app)/(shell)/admin/actions";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { LEVELS, type Level, type Unit, type UnitType } from "@/lib/types";
 import { Cover, THEMES } from "../Cover";

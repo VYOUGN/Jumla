@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { addDays, weekStart } from "@/lib/dates";
 import {
   dailyMissions,
+  dictationBonus,
   effectiveStreak,
   missionProgress,
   MISSIONS,
@@ -86,6 +87,21 @@ describe("xp and missions", () => {
     expect(t.xp).toBe(17);
     const m = MISSIONS.find((x) => x.id === "accurate_5")!;
     expect(missionProgress(m, t)).toEqual({ value: 1, done: false, claimed: true });
+  });
+
+  it("adds a dictation bonus and counts dictation sentences", () => {
+    expect(dictationBonus("sentence", 1)).toBe(5);
+    expect(dictationBonus("sentence", 0.85)).toBe(3);
+    expect(dictationBonus("sentence", 0.5)).toBe(1);
+    expect(dictationBonus("word", 1)).toBe(2);
+    expect(dictationBonus("word", 0.5)).toBe(1);
+    expect(dictationBonus("question", 1)).toBe(0);
+    const t = summarizeToday([
+      { id: "a", kind: "sentence", accuracy: 1, correct: null, mission: null, hidden: true },
+      { id: "b", kind: "sentence", accuracy: 1, correct: null, mission: null },
+    ]);
+    expect(t.dictation).toBe(1);
+    expect(t.xp).toBe(25);
   });
 
   it("starts weeks on Sunday", () => {

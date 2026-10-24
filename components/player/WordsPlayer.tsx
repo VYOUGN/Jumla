@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { xpFor } from "@/lib/gamification";
+import { dictationBonus, xpFor } from "@/lib/gamification";
 import { usePrefs } from "@/lib/prefs";
 import { speak, speechSupported, stopSpeaking } from "@/lib/speech";
 import type { Unit, Word } from "@/lib/types";
@@ -36,7 +36,8 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
   const [justDone, setJustDone] = useState(false);
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const results = useRef<TypingResult[]>([]);
+  const [earned, setEarned] = useState<{ base: number; bonus: number } | null>(null);
+  const results = useRef<(TypingResult & { hidden: boolean })[]>([]);
   const startedAt = useRef(0);
   const advance = useRef<number | undefined>(undefined);
   const prefsRef = useRef(prefs);
@@ -72,6 +73,7 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
     setIndex(from);
     setSummary(null);
     setJustDone(false);
+    setEarned(null);
     setReveal(false);
     setPhase("study");
   }
@@ -79,11 +81,14 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
   async function finish() {
     const r = results.current;
     const n = r.length || 1;
+    const bonus = r.reduce((a, x) => a + (x.hidden ? dictationBonus("word", x.accuracy) : 0), 0);
     setSummary({
       items: r.length,
       accuracy: r.reduce((a, x) => a + x.accuracy, 0) / n,
       wpm: r.reduce((a, x) => a + x.wpm, 0) / n,
-      xp: r.reduce((a, x) => a + xpFor("word", x.accuracy, null, null), 0) + xpFor("unit_complete", null, null, null),
+      xp:
+        r.reduce((a, x) => a + xpFor("word", x.accuracy, null, null), 0) + bonus + xpFor("unit_complete", null, null, null),
+      bonus,
       ms: Date.now() - startedAt.current,
     });
     setPhase("summary");
@@ -95,6 +100,7 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
   function next() {
     window.clearTimeout(advance.current);
     setJustDone(false);
+    setEarned(null);
     setReveal(false);
     if (index + 1 < words.length) {
       setIndex(index + 1);
@@ -102,9 +108,23 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
     } else void finish();
   }
 
+  /** Back to the word before: study it again, then type it again. */
+  function previous() {
+    window.clearTimeout(advance.current);
+    setJustDone(false);
+    setEarned(null);
+    setReveal(false);
+    if (index > 0) {
+      setIndex(index - 1);
+      setPhase("study");
+    }
+  }
+
   function onDone(r: TypingResult) {
-    results.current.push(r);
+    const hidden = !reveal;
+    results.current.push({ ...r, hidden });
     setJustDone(true);
+    setEarned({ base: xpFor("word", r.accuracy, null, null), bonus: hidden ? dictationBonus("word", r.accuracy) : 0 });
     void record({
       kind: "word",
       item_id: word.id,
@@ -113,8 +133,9 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
       accuracy: r.accuracy,
       wpm: r.wpm,
       word_count: 1,
+      hidden,
     });
-    advance.current = window.setTimeout(next, 900);
+    advance.current = window.setTimeout(next, hidden ? 1300 : 900);
   }
 
   if (phase === "summary" && summary) {
@@ -161,6 +182,9 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
               </div>
             )}
             <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <button className="btn btn-ghost" onClick={previous} disabled={index === 0} title="ارجع للكلمة السابقة">
+                → السابقة
+              </button>
               <button className="btn btn-ghost" onClick={() => say(word.word)}>
                 <IconVolume /> استمع
               </button>
@@ -183,20 +207,38 @@ export function WordsPlayer({ unit, words, doneCount, startAt, backHref, nextHre
               onReplay={() => say(word.word)}
               onEnter={() => justDone && next()}
             />
+            {!reveal && !justDone && (
+              <p className="mt-4 text-sm text-flame">🎧 اكتبها بدون ما تشوف الحروف وتاخذ نقاطاً إضافية.</p>
+            )}
             <div className="mt-8 flex flex-wrap items-center gap-2">
+              <button className="btn btn-ghost btn-sm" onClick={previous} disabled={index === 0} title="ارجع للكلمة السابقة">
+                → السابقة
+              </button>
               <button className="btn btn-ghost btn-sm" onClick={() => say(word.word)}>
                 <IconVolume /> استمع <kbd className="en hidden text-xs text-muted sm:inline">Shift</kbd>
               </button>
               {!reveal && !justDone && (
-                <button className="btn btn-ghost btn-sm" onClick={() => setReveal(true)}>
+                <button className="btn btn-ghost btn-sm" onClick={() => setReveal(true)} title="بدون مكافأة الإملاء">
                   أظهر الحروف
                 </button>
               )}
               <ReportButton unitId={unit.id} itemId={word.id} itemType="word" context={`${word.word} — ${word.translation_ar}`} />
               {justDone && (
-                <button className="btn btn-primary btn-sm ms-auto animate-pop" onClick={next}>
-                  التالي <kbd className="en text-xs">Enter</kbd>
-                </button>
+                <span className="ms-auto flex flex-wrap items-center gap-2">
+                  {earned && (
+                    <span className="chip animate-pop border-accent/40 text-accent">
+                      <span className="en">+{earned.base}</span> نقطة
+                    </span>
+                  )}
+                  {earned && earned.bonus > 0 && (
+                    <span className="chip animate-pop border-flame/50 bg-flame/10 text-flame">
+                      🎧 مكافأة إملاء <span className="en">+{earned.bonus}</span>
+                    </span>
+                  )}
+                  <button className="btn btn-primary btn-sm animate-pop" onClick={next}>
+                    التالي <kbd className="en text-xs">Enter</kbd>
+                  </button>
+                </span>
               )}
             </div>
           </div>

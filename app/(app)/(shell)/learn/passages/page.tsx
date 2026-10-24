@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AppShell, PageTitle } from "@/components/AppShell";
+import { PageTitle } from "@/components/AppShell";
 import { UnitGrid } from "@/components/UnitGrid";
 import { requireViewer } from "@/lib/auth";
 import { listUnitCards } from "@/lib/content";
@@ -18,7 +18,7 @@ export default async function PassagesPage({ searchParams }: { searchParams: Pro
   const units = active ? all.filter((u) => u.level === active) : all;
 
   return (
-    <AppShell>
+    <>
       <PageTitle
         title="النصوص"
         subtitle="نصوص قصيرة لتدريب أذنك: استمع أولاً، اكتب ما تسمعه، ثم أجب عن أسئلة الفهم."
@@ -40,6 +40,6 @@ export default async function PassagesPage({ searchParams }: { searchParams: Pro
         </div>
       )}
       <UnitGrid units={units} />
-    </AppShell>
+    </>
   );
 }

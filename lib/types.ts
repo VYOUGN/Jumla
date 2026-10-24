@@ -88,6 +88,8 @@ export type ProgressEvent = {
   word_count: number;
   correct: boolean | null;
   mission: string | null;
+  /** Typed with the letters hidden (dictation); earns a bonus. Missing on events queued by older versions. */
+  hidden?: boolean;
   local_date: string;
   client_ts: string;
 };

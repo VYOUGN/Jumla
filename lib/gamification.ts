@@ -22,6 +22,14 @@ export function xpFor(kind: EventKind, accuracy: number | null, correct: boolean
   }
 }
 
+/** Extra XP for typing with the letters hidden (keep in sync with public.dictation_bonus). */
+export function dictationBonus(kind: EventKind, accuracy: number | null): number {
+  const acc = accuracy ?? 0;
+  if (kind === "sentence") return acc >= 0.95 ? 5 : acc >= 0.8 ? 3 : 1;
+  if (kind === "word") return acc >= 0.95 ? 2 : 1;
+  return 0;
+}
+
 // --- Streaks (keep in sync with public.apply_progress_event) ----------------
 
 export type StreakState = { current: number; longest: number; lastActive: string | null; freezes: number };
@@ -67,11 +75,14 @@ export type TodayEvent = {
   accuracy: number | null;
   correct: boolean | null;
   mission: string | null;
+  hidden?: boolean | null;
 };
 
 export type TodaySummary = {
   sentences: number;
   accurate: number;
+  /** Sentences typed with the letters hidden. */
+  dictation: number;
   words: number;
   questionsCorrect: number;
   units: number;
@@ -96,6 +107,7 @@ export const MISSIONS: Mission[] = [
   { id: "words_10", title: "اكتب 10 كلمات من القوائم", target: 10, xp: 15, value: (t) => t.words },
   { id: "questions_3", title: "أجب عن 3 أسئلة فهم صحيحة", target: 3, xp: 15, value: (t) => t.questionsCorrect },
   { id: "xp_100", title: "اجمع 100 نقطة اليوم", target: 100, xp: 25, value: (t) => t.xp },
+  { id: "dictation_5", title: "اكتب 5 جمل بالإملاء (الحروف مخفية) 🎧", target: 5, xp: 20, value: (t) => t.dictation },
 ];
 
 function hash(text: string): number {
@@ -126,7 +138,16 @@ export function dailyMissions(date: string): Mission[] {
 
 export function summarizeToday(events: TodayEvent[]): TodaySummary {
   const seen = new Set<string>();
-  const t: TodaySummary = { sentences: 0, accurate: 0, words: 0, questionsCorrect: 0, units: 0, xp: 0, claimed: new Set() };
+  const t: TodaySummary = {
+    sentences: 0,
+    accurate: 0,
+    dictation: 0,
+    words: 0,
+    questionsCorrect: 0,
+    units: 0,
+    xp: 0,
+    claimed: new Set(),
+  };
   for (const e of events) {
     if (seen.has(e.id)) continue;
     seen.add(e.id);
@@ -134,10 +155,11 @@ export function summarizeToday(events: TodayEvent[]): TodaySummary {
       if (e.mission) t.claimed.add(e.mission);
       continue;
     }
-    t.xp += xpFor(e.kind, e.accuracy, e.correct, null);
+    t.xp += xpFor(e.kind, e.accuracy, e.correct, null) + (e.hidden ? dictationBonus(e.kind, e.accuracy) : 0);
     if (e.kind === "sentence") {
       t.sentences++;
       if ((e.accuracy ?? 0) >= 0.95) t.accurate++;
+      if (e.hidden) t.dictation++;
     } else if (e.kind === "word") t.words++;
     else if (e.kind === "question" && e.correct) t.questionsCorrect++;
     else if (e.kind === "unit_complete") t.units++;

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AppShell } from "@/components/AppShell";
 import { Missions } from "@/components/Missions";
 import { HomeTour } from "@/components/tour/HomeTour";
 import { UnitTile } from "@/components/UnitGrid";
@@ -27,7 +26,7 @@ export default async function LearnHome() {
   ];
 
   return (
-    <AppShell>
+    <>
       <h1 className="mb-6 text-2xl font-bold sm:text-3xl">مرحباً، {profile.display_name} 👋</h1>
 
       <HomeTour seen={(profile.tours_seen ?? []).includes("home")} isAdmin={profile.role === "admin"} />
@@ -66,6 +65,6 @@ export default async function LearnHome() {
           <Missions />
         </aside>
       </div>
-    </AppShell>
+    </>
   );
 }

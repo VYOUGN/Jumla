@@ -4,7 +4,17 @@ import Link from "next/link";
 import { Missions } from "../Missions";
 import { IconReplay } from "../icons";
 
-export type SummaryData = { items: number; accuracy: number; wpm: number; xp: number; ms: number; correct?: number; asked?: number };
+export type SummaryData = {
+  items: number;
+  accuracy: number;
+  wpm: number;
+  xp: number;
+  /** Part of xp earned by typing with the letters hidden. */
+  bonus?: number;
+  ms: number;
+  correct?: number;
+  asked?: number;
+};
 
 export function Summary({
   data,
@@ -40,6 +50,12 @@ export function Summary({
           ) : null}
           . تقدّمك محفوظ.
         </p>
+        {data.bonus ? (
+          <p className="mt-4 rounded-xl border border-flame/40 bg-flame/10 p-3 text-sm text-flame">
+            🎧 كتبت بالإملاء بدون ما تشوف الحروف، وأخذت مكافأة <span className="en font-bold">+{data.bonus}</span> نقطة
+            (محسوبة ضمن النقاط تحت).
+          </p>
+        ) : null}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {tiles.map((t) => (
             <div key={t.label} className="rounded-xl bg-bg p-3">

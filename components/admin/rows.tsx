@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { ActionResult } from "@/app/(app)/admin/actions";
+import type { ActionResult } from "@/app/(app)/(shell)/admin/actions";
 import { IconArchive, IconDown, IconUp } from "../icons";
 
 export function newId(): string {

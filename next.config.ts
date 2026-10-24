@@ -12,6 +12,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // Keep a visited page for 30 seconds, so going back to it is instant. Saving
+    // in the admin panel and finishing a lesson refresh it right away anyway.
+    staleTimes: { dynamic: 30 },
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

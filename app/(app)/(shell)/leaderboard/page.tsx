@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AppShell, PageTitle } from "@/components/AppShell";
+import { PageTitle } from "@/components/AppShell";
 import { IconFlame } from "@/components/icons";
 import { requireViewer } from "@/lib/auth";
 import { localDate, weekStart } from "@/lib/dates";
@@ -33,7 +33,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
   }
 
   return (
-    <AppShell>
+    <>
       <PageTitle title="الترتيب" subtitle="من جمع أكثر نقاط؟ الأسبوع يبدأ يوم الأحد." />
       <div className="mb-5 flex gap-2">
         <Link href="/leaderboard" className={`chip ${!allTime ? "border-accent text-accent" : ""}`}>
@@ -64,6 +64,6 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
         })}
         {!rows.length && <li className="p-6 text-muted">لا يوجد أحد بعد.</li>}
       </ol>
-    </AppShell>
+    </>
   );
 }

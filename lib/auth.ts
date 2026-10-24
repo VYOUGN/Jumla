@@ -3,24 +3,35 @@ import { cache } from "react";
 import { supabaseServer } from "./supabase/server";
 import type { Profile, UserStats } from "./types";
 
-/** The signed-in user for this request (deduplicated per request), or null. */
+/**
+ * The signed-in user for this request (deduplicated per request), or null.
+ *
+ * getClaims() verifies the session's signature on this server (the project signs
+ * sessions with ES256 keys), so unlike getUser() it costs no call to Supabase Auth.
+ * The profile and stats then load in parallel: one database round trip, not two.
+ * Pages that need the full account record (email changes) call getUser() themselves.
+ */
 export const getViewer = cache(async () => {
   const supabase = await supabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+  if (!claims?.sub) return null;
+  const user = { id: claims.sub, email: typeof claims.email === "string" ? claims.email : undefined };
+
   // select("*") rather than a column list, so a column added by a newer
   // migration can't break sign-in on a database that hasn't run it yet.
-  const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+  const [profileRes, statsRes] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+    supabase.from("user_stats").select("*").eq("user_id", user.id).maybeSingle(),
+  ]);
   // Without this log a database problem quietly shows everyone as a regular member.
-  if (error) console.error("[jumla] could not read the profile:", error.message);
-  const profile: Profile = (data as Profile | null) ?? {
+  if (profileRes.error) console.error("[jumla] could not read the profile:", profileRes.error.message);
+  const profile: Profile = (profileRes.data as Profile | null) ?? {
     id: user.id,
     display_name: user.email?.split("@")[0] ?? "",
     role: "member",
   };
-  return { user, profile, supabase };
+  return { user, profile, stats: (statsRes.data as UserStats | null) ?? null, supabase };
 });
 
 export async function requireViewer() {
@@ -35,9 +46,4 @@ export async function requireAdmin() {
   return viewer;
 }
 
-export const getStats = cache(async (): Promise<UserStats | null> => {
-  const viewer = await getViewer();
-  if (!viewer) return null;
-  const { data } = await viewer.supabase.from("user_stats").select("*").eq("user_id", viewer.user.id).maybeSingle();
-  return (data as UserStats | null) ?? null;
-});
+export const getStats = cache(async (): Promise<UserStats | null> => (await getViewer())?.stats ?? null);

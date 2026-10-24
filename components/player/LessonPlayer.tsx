@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { xpFor } from "@/lib/gamification";
+import { dictationBonus, xpFor } from "@/lib/gamification";
 import { usePrefs } from "@/lib/prefs";
 import { speak, speechSupported, stopSpeaking } from "@/lib/speech";
 import type { Question, Sentence, Unit } from "@/lib/types";
@@ -46,10 +46,12 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
   const [listenOnly, setListenOnly] = useState(mode === "passage");
   const [playingAll, setPlayingAll] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // XP from the sentence just finished, shown next to the "next" button.
+  const [earned, setEarned] = useState<{ base: number; bonus: number } | null>(null);
   const tour = useTour("lesson", toursSeen.includes("lesson"), phase === "typing");
   const tourSteps = useMemo(() => lessonTourSteps(mode), [mode]);
 
-  const results = useRef<TypingResult[]>([]);
+  const results = useRef<(TypingResult & { hidden: boolean })[]>([]);
   const answers = useRef<boolean[]>([]);
   const startedAt = useRef(0);
   const advance = useRef<number | undefined>(undefined);
@@ -84,6 +86,7 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
     setQIndex(0);
     setChosen(null);
     setJustDone(false);
+    setEarned(null);
     setSummary(null);
     setPhase(sentences.length ? "typing" : questions.length ? "questions" : "ready");
   }
@@ -92,14 +95,17 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
     const r = results.current;
     const n = r.length || 1;
     const correct = answers.current.filter(Boolean).length;
+    const bonus = r.reduce((a, x) => a + (x.hidden ? dictationBonus("sentence", x.accuracy) : 0), 0);
     setSummary({
       items: r.length,
       accuracy: r.reduce((a, x) => a + x.accuracy, 0) / n,
       wpm: r.reduce((a, x) => a + x.wpm, 0) / n,
       xp:
         r.reduce((a, x) => a + xpFor("sentence", x.accuracy, null, null), 0) +
+        bonus +
         answers.current.reduce((a, ok) => a + xpFor("question", null, ok, null), 0) +
         xpFor("unit_complete", null, null, null),
+      bonus,
       ms: Date.now() - startedAt.current,
       correct,
       asked: answers.current.length,
@@ -113,14 +119,32 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
   function next() {
     window.clearTimeout(advance.current);
     setJustDone(false);
+    setEarned(null);
     if (index + 1 < sentences.length) setIndex(index + 1);
     else if (mode === "passage" && questions.length) setPhase("questions");
     else void finish();
   }
 
+  /** Back to the sentence before, to type it again (it counts as another try). */
+  function previous() {
+    window.clearTimeout(advance.current);
+    setJustDone(false);
+    setEarned(null);
+    if (index > 0) setIndex(index - 1);
+  }
+
+  function setHidden(value: boolean) {
+    if (mode === "passage") setListenOnly(value);
+    else setPrefs({ dictation: value });
+  }
+
   function onSentenceDone(r: TypingResult) {
-    results.current.push(r);
+    results.current.push({ ...r, hidden });
     setJustDone(true);
+    setEarned({
+      base: xpFor("sentence", r.accuracy, null, null),
+      bonus: hidden ? dictationBonus("sentence", r.accuracy) : 0,
+    });
     void record({
       kind: "sentence",
       item_id: sentence.id,
@@ -129,8 +153,10 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
       accuracy: r.accuracy,
       wpm: r.wpm,
       word_count: countWords(sentence.text_en),
+      hidden,
     });
-    advance.current = window.setTimeout(next, 900);
+    // A little longer when there is a bonus to see.
+    advance.current = window.setTimeout(next, hidden ? 1400 : 900);
   }
 
   async function playAll() {
@@ -264,18 +290,21 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
         onSettingsChange={setSettingsOpen}
         onHelp={tour.start}
         right={
-          mode === "passage" ? (
-            <button
-              className={`chip ${listenOnly ? "border-accent/40 text-accent" : ""}`}
-              onClick={() => setListenOnly((v) => !v)}
-              title={listenOnly ? "النص مخفي: اكتب ما تسمعه. اضغط لإظهاره" : "النص ظاهر: اضغط لإخفائه"}
-              aria-pressed={!listenOnly}
-              data-tour="hide-text"
-            >
-              {listenOnly ? <IconEyeOff /> : <IconEye />}
-              <span className="hidden md:inline">{listenOnly ? "النص مخفي" : "النص ظاهر"}</span>
-            </button>
-          ) : null
+          <button
+            className={`chip ${hidden ? "border-flame/50 text-flame" : ""}`}
+            onClick={() => setHidden(!hidden)}
+            title={
+              hidden
+                ? "الإملاء شغّال: الحروف مخفية وتاخذ نقاطاً إضافية. اضغط لإظهار الحروف"
+                : "اخفِ الحروف واكتب اللي تسمعه، وتاخذ نقاطاً إضافية"
+            }
+            aria-pressed={hidden}
+            data-tour="hide-text"
+          >
+            {hidden ? <IconEyeOff /> : <IconEye />}
+            <span aria-hidden>🎧</span>
+            <span className="hidden md:inline">{hidden ? "إملاء: نقاط إضافية" : "اخفِ الحروف"}</span>
+          </button>
         }
       />
       <Tour steps={tourSteps} open={tour.open} onClose={tour.close} />
@@ -305,6 +334,15 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
             </p>
           )}
           <div className="mt-8 flex flex-wrap items-center gap-2">
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={previous}
+              disabled={index === 0}
+              title="ارجع للجملة السابقة واكتبها مرة ثانية"
+              data-tour="prev"
+            >
+              → السابقة
+            </button>
             <button className="btn btn-ghost btn-sm" onClick={() => say(sentence.text_en)} data-tour="listen">
               <IconVolume /> استمع <kbd className="en hidden text-xs text-muted sm:inline">Shift</kbd>
             </button>
@@ -312,9 +350,21 @@ export function LessonPlayer({ mode, unit, sentences, questions, doneCount, star
               <ReportButton unitId={unit.id} itemId={sentence.id} itemType="sentence" context={sentence.text_en} />
             </span>
             {justDone && (
-              <button className="btn btn-primary btn-sm ms-auto animate-pop" onClick={next}>
-                التالي <kbd className="en text-xs">Enter</kbd>
-              </button>
+              <span className="ms-auto flex flex-wrap items-center gap-2">
+                {earned && (
+                  <span className="chip animate-pop border-accent/40 text-accent">
+                    <span className="en">+{earned.base}</span> نقطة
+                  </span>
+                )}
+                {earned && earned.bonus > 0 && (
+                  <span className="chip animate-pop border-flame/50 bg-flame/10 text-flame">
+                    🎧 مكافأة إملاء <span className="en">+{earned.bonus}</span>
+                  </span>
+                )}
+                <button className="btn btn-primary btn-sm animate-pop" onClick={next}>
+                  التالي <kbd className="en text-xs">Enter</kbd>
+                </button>
+              </span>
             )}
           </div>
         </div>

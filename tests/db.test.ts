@@ -254,6 +254,27 @@ describe("cheating and abuse", () => {
     expect(await record(id, [ev({ kind: "mission", mission: "sentences_10" })])).toBe(1);
   });
 
+  it("adds a dictation bonus for typing with the letters hidden", async () => {
+    const id = await signUp("listener@example.com", "let-me-in");
+    await record(id, [ev({ item_id: sentenceIds[0], unit_id: unitId, accuracy: 1, hidden: true })]); // 10 + 5
+    await record(id, [ev({ item_id: sentenceIds[1], unit_id: unitId, accuracy: 0.85, hidden: true })]); // 7 + 3
+    await record(id, [ev({ item_id: sentenceIds[2], unit_id: unitId, accuracy: 1 })]); // 10, letters shown
+    expect((await stats(id)).xp).toBe(35);
+    const flags = await db.query<{ hidden: boolean }>(
+      "select hidden from public.progress_events where user_id = $1 order by client_ts",
+      [id],
+    );
+    expect(flags.rows.map((r) => r.hidden)).toEqual([true, true, false]);
+  });
+
+  it("pays the dictation mission only after five hidden-letter sentences", async () => {
+    const id = await signUp("dictator@example.com", "let-me-in");
+    for (const item of sentenceIds.slice(0, 4)) await record(id, [ev({ item_id: item, unit_id: unitId, hidden: true })]);
+    expect(await record(id, [ev({ kind: "mission", mission: "dictation_5" })])).toBe(0);
+    await record(id, [ev({ item_id: sentenceIds[4], unit_id: unitId, hidden: true })]);
+    expect(await record(id, [ev({ kind: "mission", mission: "dictation_5" })])).toBe(1);
+  });
+
   it("rejects oversized batches", async () => {
     const big = Array.from({ length: 501 }, () => ev({ item_id: sentenceIds[0], unit_id: unitId }));
     await expect(record(member, big)).rejects.toThrow(/too many events/);

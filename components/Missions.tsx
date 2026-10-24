@@ -24,7 +24,7 @@ export function Missions({ compact = false }: { compact?: boolean }) {
       const [{ data }, local] = await Promise.all([
         supabaseBrowser()
           .from("progress_events")
-          .select("id, kind, accuracy, correct, mission")
+          .select("id, kind, accuracy, correct, mission, hidden")
           .eq("user_id", userId)
           .eq("local_date", today)
           .limit(5000),

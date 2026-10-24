@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { saveQuestions, type QuestionRow } from "@/app/(app)/admin/actions";
+import { saveQuestions, type QuestionRow } from "@/app/(app)/(shell)/admin/actions";
 import { IconPlus } from "../icons";
 import { newId, RowTools, SaveBar, useFocusRow, useRows } from "./rows";
 

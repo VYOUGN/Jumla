@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { saveSentences, type SentenceRow } from "@/app/(app)/admin/actions";
+import { saveSentences, type SentenceRow } from "@/app/(app)/(shell)/admin/actions";
 import { buildHints } from "@/lib/words";
 import { IconPlus } from "../icons";
 import { newId, RowTools, SaveBar, useFocusRow, useRows } from "./rows";
