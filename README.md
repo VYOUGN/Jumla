@@ -87,9 +87,20 @@ git push -u origin main
 في GitHub: **Settings → Secrets and variables → Actions → New repository secret** وأضف:
 
 - `SUPABASE_DB_URL` (نفس قيمة `.env.local`): **مطلوب**.
+- `BACKUP_PASSPHRASE`: **مطلوب**. كلمة سر طويلة (16 حرفاً على الأقل) تُشفَّر بها كل نسخة (AES-256)، فما يقدر أحد يفتح النسخة حتى لو حمّلها. بدون هذه الكلمة ما تُحفظ أي نسخة.
 - `NEXT_PUBLIC_SUPABASE_URL` والمفتاح العام (باسم `NEXT_PUBLIC_SUPABASE_ANON_KEY` أو `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`): اختياريان، ويُبقيان مشروع Supabase المجاني نشطاً.
 
-ثم من تبويب **Actions → Daily database backup → Run workflow** شغّله مرة لتتأكد أنه يعمل. بعدها يعمل وحده كل يوم، وتجد النسخ في صفحة كل تشغيل تحت **Artifacts** (تُحفظ 90 يوماً). النسخة تحتوي بيانات الحسابات، فأبقِ المستودع **خاصاً**.
+**كلمة سر النسخ:** هذا الأمر في PowerShell يولّد كلمة قوية وينسخها مباشرة، فما تظهر على الشاشة:
+
+```powershell
+$b = New-Object byte[] 24; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b) | Set-Clipboard
+```
+
+الصقها في قيمة الـ secret، **واحفظها في مكان آمن** (مثل مدير كلمات المرور). بدونها ما تقدر تفتح أي نسخة، ولا أحد يقدر يسترجعها لك. وإذا غيّرتها لاحقاً، النسخ القديمة تبقى تُفتح بالكلمة القديمة فقط.
+
+ثم من تبويب **Actions → Daily database backup → Run workflow** شغّله مرة لتتأكد أنه يعمل. بعدها يعمل وحده كل يوم، وتجد النسخ في صفحة كل تشغيل تحت **Artifacts** باسم `jumla-backup-encrypted-…` (تُحفظ 90 يوماً).
+
+**قبل ما تخلّي المستودع عاماً (public):** النسخ اللي انحفظت قبل إضافة التشفير (باسم `jumla-backup-رقم`) غير مشفّرة، وفيها إيميلات أصحابك. احذفها مرة واحدة: **Actions → Delete old unencrypted backups → Run workflow** ← اكتب `DELETE` في الخانة ← **Run workflow**. ما يحذف شيئاً إذا ما فيه نسخة مشفّرة واحدة على الأقل، والنسخ المشفّرة تبقى.
 
 ### 6) تأكيد الإيميل عند التسجيل
 
@@ -132,11 +143,21 @@ git push -u origin main
 3. **بدون تكرار**: لكل خطوة معرّف فريد، فإعادة إرسالها لا تُحسب مرتين.
 4. **التقدّم يزيد ولا ينقص**: سجل الخطوات لا يقبل إلا الإضافة، والإحصائيات تُحسب منه في قاعدة البيانات، والنقاط يحسبها الخادم لا الجهاز.
 5. **لا يوجد حذف**: قواعد الحماية لا تسمح لأحد (ولا حتى للمدير) بحذف أو تعديل التقدّم، وحذف المحتوى أرشفة فقط.
-6. **نسخة احتياطية يومية** على GitHub لمدة 90 يوماً، ونسخة JSON فورية من لوحة المدير.
+6. **نسخة احتياطية يومية مشفّرة** على GitHub لمدة 90 يوماً، ونسخة JSON فورية من لوحة المدير.
 
 ## استرجاع نسخة احتياطية (للطوارئ فقط)
 
-حمّل الـ Artifact من GitHub وفكّ ضغطه، ثم (مع تثبيت أدوات PostgreSQL 17):
+حمّل الـ Artifact من GitHub وفكّ ضغطه، فتجد ملفاً مثل `jumla-backup-YYYY-MM-DD.tar.gpg`. افتح PowerShell في نفس المجلد وفكّ التشفير. برنامج `gpg` يجي مع Git، ويطلب كلمة سر النسخ في نافذة صغيرة:
+
+```powershell
+& "C:\Program Files\Git\usr\bin\gpg.exe" --output backup.tar --decrypt jumla-backup-YYYY-MM-DD.tar.gpg
+```
+
+```powershell
+tar -xf backup.tar
+```
+
+يطلع لك ملفان: `public-YYYY-MM-DD.dump` و `auth-YYYY-MM-DD.dump`. بعدها (مع تثبيت أدوات PostgreSQL 17):
 
 ```bash
 pg_restore --clean --if-exists --no-owner -d "$SUPABASE_DB_URL" public-YYYY-MM-DD.dump

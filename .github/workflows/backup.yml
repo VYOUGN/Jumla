@@ -1,5 +1,8 @@
 # Daily copy of the whole database, kept for 90 days under Actions → this workflow → Artifacts.
-# Needs the repository secret SUPABASE_DB_URL (Supabase → Connect → Session pooler URI).
+# Needs two repository secrets (see README section 5):
+#   SUPABASE_DB_URL     Supabase → Connect → Session pooler URI
+#   BACKUP_PASSPHRASE   16+ characters; every backup is encrypted with it (AES-256), so the
+#                       files are safe even if someone downloads them. Without it nothing is saved.
 # Optional secrets NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY also ping the API
 # so a quiet week never lets the free Supabase project pause.
 name: Daily database backup
@@ -12,11 +15,26 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    # Explicit bash runs with -e -o pipefail, so a failure anywhere in a pipe stops the job.
+    shell: bash
+
 jobs:
   backup:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      - name: Check the backup passphrase
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          # Stop before anything is dumped: an unencrypted copy is never uploaded.
+          if [ "${#BACKUP_PASSPHRASE}" -lt 16 ]; then
+            echo "::error::Add the BACKUP_PASSPHRASE repository secret, at least 16 characters (see README section 5)."
+            exit 1
+          fi
+
       - name: Install PostgreSQL 17 client
         run: |
           sudo apt-get update -y
@@ -66,23 +84,49 @@ jobs:
           fi
 
           stamp=$(date -u +%Y-%m-%d)
-          mkdir -p backup
+          echo "STAMP=$stamp" >> "$GITHUB_ENV"
+          # Plain files stay on this temporary machine; only the encrypted file is uploaded.
+          mkdir -p plain
           # Content, progress and settings.
-          $PG/pg_dump --schema=public --no-owner --no-privileges -Fc -f "backup/public-$stamp.dump"
+          $PG/pg_dump --schema=public --no-owner --no-privileges -Fc -f "plain/public-$stamp.dump"
           # Accounts, so friends keep the same logins (and progress stays linked) after a restore.
           $PG/pg_dump --data-only --table=auth.users --table=auth.identities \
-            --no-owner --no-privileges -Fc -f "backup/auth-$stamp.dump"
-          ls -la backup
+            --no-owner --no-privileges -Fc -f "plain/auth-$stamp.dump"
+          ls -la plain
+
+      - name: Encrypt the backup
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          out="encrypted/jumla-backup-$STAMP.tar.gpg"
+          mkdir -p encrypted
+          # The passphrase reaches gpg through a pipe, never as a command-line argument.
+          tar -C plain -cf - . | gpg --batch --yes --pinentry-mode loopback \
+            --passphrase-file <(printf '%s' "$BACKUP_PASSPHRASE") \
+            --symmetric --cipher-algo AES256 --s2k-digest-algo SHA512 --s2k-count 65011712 \
+            --output "$out"
+          rm -rf plain
+          # Prove the file opens with the passphrase and holds both dumps before uploading it.
+          contents=$(gpg --batch --quiet --pinentry-mode loopback \
+            --passphrase-file <(printf '%s' "$BACKUP_PASSPHRASE") --decrypt "$out" | tar -tf -)
+          echo "$contents"
+          grep -q "public-$STAMP.dump" <<< "$contents"
+          grep -q "auth-$STAMP.dump" <<< "$contents"
+          ls -la encrypted
 
       - name: Upload backup
         uses: actions/upload-artifact@v4
         with:
-          name: jumla-backup-${{ github.run_number }}
-          path: backup/
+          name: jumla-backup-encrypted-${{ github.run_number }}
+          path: encrypted/
           retention-days: 90
+          # Encrypted data does not compress.
+          compression-level: 0
           if-no-files-found: error
 
       - name: Keep the Supabase project awake
+        # Runs even if the backup failed, so the project never pauses because of it.
+        if: always()
         env:
           SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
